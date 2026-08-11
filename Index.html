@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f7f5">
+  <meta name="color-scheme" content="light">
+  <title>Minimal P2P Transfer</title>
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <style>
+    :root {
+      --page-max-width: 560px;
+      --page-padding: clamp(16px, 4vw, 28px);
+      --card-padding: clamp(18px, 4vw, 26px);
+      --radius-large: 22px;
+      --radius-medium: 14px;
+      --background: #f7f7f5;
+      --surface: #ffffff;
+      --surface-alt: #f1f2ef;
+      --text: #171817;
+      --muted: #71746f;
+      --line: #e2e4df;
+      --accent: #1f6f54;
+      --accent-hover: #195d47;
+      --accent-soft: #e7f1ed;
+      --danger: #b6433c;
+      --shadow: 0 16px 45px rgba(26, 35, 30, 0.08);
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { -webkit-text-size-adjust: 100%; }
+
+    body {
+      min-width: 320px;
+      min-height: 100svh;
+      margin: 0;
+      color: var(--text);
+      background: var(--background);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+
+    .app {
+      width: min(100%, var(--page-max-width));
+      min-height: 100svh;
+      margin: 0 auto;
+      padding: calc(var(--page-padding) + var(--safe-top)) var(--page-padding)
+        calc(var(--page-padding) + var(--safe-bottom));
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .brand { margin-bottom: 22px; }
+
+    .eyebrow {
+      margin: 0 0 7px;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 750;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 8vw, 40px);
+      line-height: 1.08;
+      letter-spacing: -.04em;
+    }
+
+    .subtitle {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .shell {
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid rgba(226, 228, 223, .9);
+      border-radius: var(--radius-large);
+      box-shadow: var(--shadow);
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      margin: 8px;
+      padding: 4px;
+      background: var(--surface-alt);
+      border-radius: 16px;
+    }
+
+    .tab {
+      min-height: 44px;
+      border: 0;
+      border-radius: 12px;
+      color: var(--muted);
+      background: transparent;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .18s ease, color .18s ease, box-shadow .18s ease;
+    }
+
+    .tab.active {
+      color: var(--text);
+      background: var(--surface);
+      box-shadow: 0 2px 10px rgba(20, 25, 22, .07);
+    }
+
+    .panel { padding: var(--card-padding); }
+    .panel[hidden] { display: none; }
+
+    .section-title {
+      margin: 0 0 14px;
+      font-size: 17px;
+      letter-spacing: -.01em;
+    }
+
+    .dropzone {
+      display: grid;
+      place-items: center;
+      min-height: 152px;
+      padding: 20px;
+      border: 1.5px dashed #c9cdc7;
+      border-radius: var(--radius-medium);
+      background: #fbfcfa;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .18s ease, background .18s ease;
+    }
+
+    .dropzone:hover, .dropzone.dragging {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .dropzone input { display: none; }
+
+    .drop-icon {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      margin-bottom: 10px;
+      border-radius: 50%;
+      color: var(--accent);
+      background: var(--accent-soft);
+      font-size: 22px;
+      font-weight: 500;
+    }
+
+    .drop-title { font-weight: 750; }
+    .drop-note { margin-top: 4px; color: var(--muted); font-size: 13px; }
+
+    .file-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      margin-top: 14px;
+      padding: 13px 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-medium);
+      background: var(--surface);
+    }
+
+    .file-name {
+      overflow: hidden;
+      font-weight: 700;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .file-size { color: var(--muted); font-size: 13px; }
+
+    .code-wrap {
+      margin-top: 22px;
+      padding: 18px;
+      border-radius: var(--radius-medium);
+      background: var(--accent-soft);
+      text-align: center;
+    }
+
+    .code-label { color: var(--muted); font-size: 12px; font-weight: 700; }
+
+    .passcode {
+      margin: 4px 0 2px;
+      color: var(--accent);
+      font-size: clamp(34px, 11vw, 48px);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: .15em;
+      font-variant-numeric: tabular-nums;
+      user-select: all;
+    }
+
+    .code-hint { color: var(--muted); font-size: 12px; }
+
+    .input-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .code-input {
+      width: 100%;
+      height: 58px;
+      padding: 0 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-medium);
+      outline: none;
+      color: var(--text);
+      background: var(--surface);
+      font-size: 24px;
+      font-weight: 750;
+      letter-spacing: .16em;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+      transition: border-color .18s ease, box-shadow .18s ease;
+    }
+
+    .code-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-soft);
+    }
+
+    .primary, .secondary {
+      width: 100%;
+      min-height: 50px;
+      margin-top: 14px;
+      border-radius: var(--radius-medium);
+      font-weight: 750;
+      cursor: pointer;
+      transition: background .18s ease, opacity .18s ease, transform .08s ease;
+    }
+
+    .primary {
+      border: 0;
+      color: #fff;
+      background: var(--accent);
+    }
+
+    .primary:hover { background: var(--accent-hover); }
+    .primary:active, .secondary:active { transform: scale(.99); }
+    .primary:disabled, .secondary:disabled { opacity: .45; cursor: not-allowed; }
+
+    .secondary {
+      border: 1px solid var(--line);
+      color: var(--text);
+      background: var(--surface);
+    }
+
+    .status-area { margin-top: 18px; }
+
+    .status-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .status-dot {
+      flex: 0 0 auto;
+      width: 8px;
+      height: 8px;
+      margin-top: 6px;
+      border-radius: 50%;
+      background: #aeb2ac;
+    }
+
+    .status-dot.ready, .status-dot.success { background: var(--accent); }
+    .status-dot.busy { background: #d28a25; animation: pulse 1s infinite alternate; }
+    .status-dot.error { background: var(--danger); }
+
+    .progress {
+      overflow: hidden;
+      height: 7px;
+      margin-top: 12px;
+      border-radius: 999px;
+      background: var(--surface-alt);
+    }
+
+    .progress-bar {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--accent);
+      transition: width .16s linear;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    footer {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    @keyframes pulse { to { opacity: .35; } }
+
+    @media (min-width: 860px) {
+      :root { --page-max-width: 680px; }
+      .app { padding-top: 46px; padding-bottom: 46px; }
+      .panel { min-height: 390px; }
+    }
+
+    @media (max-height: 700px) and (min-width: 700px) {
+      .app { justify-content: flex-start; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="brand">
+      <p class="eyebrow">Direct Transfer</p>
+      <h1>P2P 文件传输</h1>
+      <p class="subtitle">浏览器之间直接传输。无需上传文件到云端。</p>
+    </header>
+
+    <section class="shell" aria-label="文件传输工具">
+      <nav class="tabs" aria-label="传输模式">
+        <button class="tab active" id="sendTab" type="button" aria-selected="true">发送</button>
+        <button class="tab" id="receiveTab" type="button" aria-selected="false">接收</button>
+      </nav>
+
+      <section class="panel" id="sendPanel">
+        <h2 class="section-title">选择要发送的文件</h2>
+        <label class="dropzone" id="dropzone" for="fileInput">
+          <input type="file" id="fileInput">
+          <span class="drop-icon" aria-hidden="true">+</span>
+          <span class="drop-title">点击选择或拖入文件</span>
+          <span class="drop-note" id="sizeLimitNote">单个文件最大 2 GB</span>
+        </label>
+
+        <div class="file-card" id="fileCard" hidden>
+          <div>
+            <div class="file-name" id="fileName"></div>
+            <div class="file-size" id="fileSize"></div>
+          </div>
+          <button class="secondary" id="changeFileBtn" type="button" style="width:auto; min-height:38px; margin:0; padding:0 12px;">更换</button>
+        </div>
+
+        <div class="code-wrap" id="codeWrap" hidden>
+          <div class="code-label">接收口令</div>
+          <div class="passcode" id="passcodeBox">------</div>
+          <div class="code-hint">在另一台设备中输入此口令</div>
+        </div>
+
+        <div class="status-area">
+          <div class="status-row" role="status" aria-live="polite">
+            <span class="status-dot" id="sendDot"></span>
+            <span id="sendStatus">请选择一个文件。</span>
+          </div>
+          <div id="sendProgressWrap" hidden>
+            <div class="progress"><div class="progress-bar" id="sendProgress"></div></div>
+            <div class="progress-meta"><span id="sendBytes">0 B / 0 B</span><span id="sendPercent">0%</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="receivePanel" hidden>
+        <h2 class="section-title">输入发送设备上的 6 位口令</h2>
+        <label class="input-label" for="passcodeInput">接收口令</label>
+        <input class="code-input" id="passcodeInput" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" aria-describedby="receiveStatus">
+        <button class="primary" id="downloadBtn" type="button">连接并接收</button>
+
+        <div class="file-card" id="incomingFileCard" hidden>
+          <div>
+            <div class="file-name" id="incomingFileName"></div>
+            <div class="file-size" id="incomingFileSize"></div>
+          </div>
+        </div>
+
+        <div class="status-area">
+          <div class="status-row" role="status" aria-live="polite">
+            <span class="status-dot" id="receiveDot"></span>
+            <span id="receiveStatus">等待输入口令。</span>
+          </div>
+          <div id="receiveProgressWrap" hidden>
+            <div class="progress"><div class="progress-bar" id="receiveProgress"></div></div>
+            <div class="progress-meta"><span id="receiveBytes">0 B / 0 B</span><span id="receivePercent">0%</span></div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <footer>页面关闭或刷新后，当前连接即失效。</footer>
+  </main>
+
+  <script>
+    "use strict";
+
+    /* ===== 可按需修改的核心变量 ===== */
+    const CONFIG = {
+      PEER_PREFIX: "jarvis-p2p-",
+      PASSCODE_LENGTH: 6,
+      CHUNK_SIZE: 256 * 1024,
+      MAX_FILE_SIZE: 2 * 1024 * 1024 * 1024,
+      BUFFER_HIGH_WATER: 4 * 1024 * 1024,
+      CONNECTION_TIMEOUT: 20000
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const state = {
+      mode: "send",
+      senderPeer: null,
+      receiverPeer: null,
+      selectedFile: null,
+      sending: false,
+      receiving: false,
+      receiveChunks: [],
+      receiveMeta: null,
+      receivedBytes: 0,
+      receiveUrl: null
+    };
+
+    const ui = {
+      sendTab: $("sendTab"), receiveTab: $("receiveTab"),
+      sendPanel: $("sendPanel"), receivePanel: $("receivePanel"),
+      fileInput: $("fileInput"), dropzone: $("dropzone"),
+      fileCard: $("fileCard"), fileName: $("fileName"), fileSize: $("fileSize"),
+      changeFileBtn: $("changeFileBtn"), codeWrap: $("codeWrap"), passcodeBox: $("passcodeBox"),
+      sendStatus: $("sendStatus"), sendDot: $("sendDot"),
+      sendProgressWrap: $("sendProgressWrap"), sendProgress: $("sendProgress"),
+      sendBytes: $("sendBytes"), sendPercent: $("sendPercent"),
+      passcodeInput: $("passcodeInput"), downloadBtn: $("downloadBtn"),
+      incomingFileCard: $("incomingFileCard"), incomingFileName: $("incomingFileName"),
+      incomingFileSize: $("incomingFileSize"), receiveStatus: $("receiveStatus"), receiveDot: $("receiveDot"),
+      receiveProgressWrap: $("receiveProgressWrap"), receiveProgress: $("receiveProgress"),
+      receiveBytes: $("receiveBytes"), receivePercent: $("receivePercent"),
+      sizeLimitNote: $("sizeLimitNote")
+    };
+
+    ui.sizeLimitNote.textContent = `单个文件最大 ${formatBytes(CONFIG.MAX_FILE_SIZE)}`;
+
+    function setMode(mode) {
+      state.mode = mode;
+      const isSend = mode === "send";
+      ui.sendPanel.hidden = !isSend;
+      ui.receivePanel.hidden = isSend;
+      ui.sendTab.classList.toggle("active", isSend);
+      ui.receiveTab.classList.toggle("active", !isSend);
+      ui.sendTab.setAttribute("aria-selected", String(isSend));
+      ui.receiveTab.setAttribute("aria-selected", String(!isSend));
+      if (!isSend) setTimeout(() => ui.passcodeInput.focus(), 60);
+    }
+
+    function setStatus(target, message, type = "") {
+      const status = target === "send" ? ui.sendStatus : ui.receiveStatus;
+      const dot = target === "send" ? ui.sendDot : ui.receiveDot;
+      status.textContent = message;
+      dot.className = `status-dot ${type}`.trim();
+    }
+
+    function updateProgress(target, current, total) {
+      const safeTotal = Math.max(total, 1);
+      const percent = Math.min(100, Math.round((current / safeTotal) * 100));
+      const wrap = target === "send" ? ui.sendProgressWrap : ui.receiveProgressWrap;
+      const bar = target === "send" ? ui.sendProgress : ui.receiveProgress;
+      const bytes = target === "send" ? ui.sendBytes : ui.receiveBytes;
+      const percentText = target === "send" ? ui.sendPercent : ui.receivePercent;
+      wrap.hidden = false;
+      bar.style.width = `${percent}%`;
+      bytes.textContent = `${formatBytes(current)} / ${formatBytes(total)}`;
+      percentText.textContent = `${percent}%`;
+    }
+
+    function formatBytes(bytes) {
+      if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
+      const units = ["B", "KB", "MB", "GB", "TB"];
+      const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+      const value = bytes / Math.pow(1024, index);
+      return `${value >= 100 || index === 0 ? value.toFixed(0) : value.toFixed(1)} ${units[index]}`;
+    }
+
+    function generateCode() {
+      const min = Math.pow(10, CONFIG.PASSCODE_LENGTH - 1);
+      const range = 9 * min;
+      const random = new Uint32Array(1);
+      crypto.getRandomValues(random);
+      return String(min + (random[0] % range));
+    }
+
+    function cleanupPeer(key) {
+      const peer = state[key];
+      if (peer && !peer.destroyed) peer.destroy();
+      state[key] = null;
+    }
+
+    function resetReceiver() {
+      state.receiveChunks = [];
+      state.receiveMeta = null;
+      state.receivedBytes = 0;
+      state.receiving = false;
+      ui.incomingFileCard.hidden = true;
+      ui.receiveProgressWrap.hidden = true;
+      ui.receiveProgress.style.width = "0%";
+    }
+
+    async function selectFile(file) {
+      if (!file) return;
+      if (file.size > CONFIG.MAX_FILE_SIZE) {
+        setStatus("send", `文件超过 ${formatBytes(CONFIG.MAX_FILE_SIZE)} 限制。`, "error");
+        ui.fileInput.value = "";
+        return;
+      }
+
+      state.selectedFile = file;
+      ui.fileName.textContent = file.name;
+      ui.fileSize.textContent = formatBytes(file.size);
+      ui.fileCard.hidden = false;
+      ui.dropzone.hidden = true;
+      ui.codeWrap.hidden = false;
+      ui.sendProgressWrap.hidden = true;
+      await createSender();
+    }
+
+    async function createSender() {
+      cleanupPeer("senderPeer");
+      state.sending = false;
+      const code = generateCode();
+      ui.passcodeBox.textContent = code;
+      setStatus("send", "正在创建安全连接…", "busy");
+
+      const peer = new Peer(CONFIG.PEER_PREFIX + code, { debug: 1 });
+      state.senderPeer = peer;
+
+      peer.on("open", () => setStatus("send", "已就绪，等待接收设备连接。", "ready"));
+
+      peer.on("connection", (conn) => {
+        setStatus("send", "接收设备已连接，正在准备传输…", "busy");
+        conn.on("data", async (message) => {
+          if (message && message.type === "ready" && !state.sending) {
+            await sendFile(conn);
+          }
+          if (message && message.type === "complete") {
+            setStatus("send", "传输完成。", "success");
+            updateProgress("send", state.selectedFile.size, state.selectedFile.size);
+            state.sending = false;
+          }
+        });
+        conn.on("close", () => {
+          if (state.sending) setStatus("send", "连接已中断，请重新选择文件。", "error");
+          state.sending = false;
+        });
+        conn.on("error", () => setStatus("send", "数据连接发生错误。", "error"));
+      });
+
+      peer.on("error", (error) => {
+        const message = error.type === "unavailable-id" ? "口令发生冲突，正在重新生成…" : "连接服务不可用，请检查网络后重试。";
+        setStatus("send", message, error.type === "unavailable-id" ? "busy" : "error");
+        if (error.type === "unavailable-id") setTimeout(createSender, 300);
+      });
+    }
+
+    async function sendFile(conn) {
+      const file = state.selectedFile;
+      if (!file) return;
+      state.sending = true;
+      updateProgress("send", 0, file.size);
+      setStatus("send", "正在发送文件，请保持页面开启。", "busy");
+
+      conn.send({ type: "meta", name: file.name, size: file.size, mime: file.type || "application/octet-stream" });
+
+      let offset = 0;
+      try {
+        while (offset < file.size) {
+          if (!conn.open) throw new Error("connection-closed");
+          const end = Math.min(offset + CONFIG.CHUNK_SIZE, file.size);
+          const chunk = await file.slice(offset, end).arrayBuffer();
+          conn.send({ type: "chunk", data: chunk });
+          offset = end;
+          updateProgress("send", offset, file.size);
+          await waitForBuffer(conn);
+        }
+        conn.send({ type: "end" });
+        setStatus("send", "已发送，等待接收设备确认…", "busy");
+      } catch (error) {
+        state.sending = false;
+        setStatus("send", "发送中断，请重新选择文件后再试。", "error");
+      }
+    }
+
+    function waitForBuffer(conn) {
+      return new Promise((resolve) => {
+        const channel = conn.dataChannel;
+        if (!channel || channel.bufferedAmount < CONFIG.BUFFER_HIGH_WATER) return resolve();
+        const timer = setInterval(() => {
+          if (!conn.open || !channel || channel.bufferedAmount < CONFIG.BUFFER_HIGH_WATER / 2) {
+            clearInterval(timer);
+            resolve();
+          }
+        }, 35);
+      });
+    }
+
+    function receiveFile() {
+      const code = ui.passcodeInput.value.replace(/\D/g, "").slice(0, CONFIG.PASSCODE_LENGTH);
+      ui.passcodeInput.value = code;
+      if (code.length !== CONFIG.PASSCODE_LENGTH || state.receiving) {
+        setStatus("receive", `请输入 ${CONFIG.PASSCODE_LENGTH} 位数字口令。`, "error");
+        return;
+      }
+
+      cleanupPeer("receiverPeer");
+      resetReceiver();
+      state.receiving = true;
+      ui.downloadBtn.disabled = true;
+      setStatus("receive", "正在连接发送设备…", "busy");
+
+      const peer = new Peer(undefined, { debug: 1 });
+      state.receiverPeer = peer;
+      let settled = false;
+      const timeout = setTimeout(() => {
+        if (!settled) failReceive("连接超时，请确认口令和发送页面是否仍在开启。");
+      }, CONFIG.CONNECTION_TIMEOUT);
+
+      peer.on("open", () => {
+        const conn = peer.connect(CONFIG.PEER_PREFIX + code, { reliable: true });
+        conn.on("open", () => {
+          settled = true;
+          clearTimeout(timeout);
+          setStatus("receive", "连接成功，等待文件…", "ready");
+          conn.send({ type: "ready" });
+        });
+
+        conn.on("data", (message) => handleIncoming(message, conn));
+        conn.on("close", () => {
+          if (state.receiving) failReceive("连接已中断，请重新连接。");
+        });
+        conn.on("error", () => failReceive("数据连接发生错误，请重试。"));
+      });
+
+      peer.on("error", () => {
+        clearTimeout(timeout);
+        failReceive("未找到发送设备，请检查口令或网络。");
+      });
+    }
+
+    function handleIncoming(message, conn) {
+      if (!message || !message.type) return;
+
+      if (message.type === "meta") {
+        state.receiveMeta = message;
+        state.receiveChunks = [];
+        state.receivedBytes = 0;
+        ui.incomingFileName.textContent = message.name;
+        ui.incomingFileSize.textContent = formatBytes(message.size);
+        ui.incomingFileCard.hidden = false;
+        updateProgress("receive", 0, message.size);
+        setStatus("receive", "正在接收文件，请保持页面开启。", "busy");
+        return;
+      }
+
+      if (message.type === "chunk" && state.receiveMeta) {
+        const chunk = message.data;
+        state.receiveChunks.push(chunk);
+        state.receivedBytes += chunk.byteLength || chunk.size || 0;
+        updateProgress("receive", state.receivedBytes, state.receiveMeta.size);
+        return;
+      }
+
+      if (message.type === "end" && state.receiveMeta) {
+        const blob = new Blob(state.receiveChunks, { type: state.receiveMeta.mime });
+        saveBlob(blob, state.receiveMeta.name);
+        state.receiving = false;
+        ui.downloadBtn.disabled = false;
+        updateProgress("receive", state.receiveMeta.size, state.receiveMeta.size);
+        setStatus("receive", "接收完成，文件已保存。", "success");
+        conn.send({ type: "complete" });
+        setTimeout(() => cleanupPeer("receiverPeer"), 800);
+      }
+    }
+
+    function saveBlob(blob, filename) {
+      if (state.receiveUrl) URL.revokeObjectURL(state.receiveUrl);
+      state.receiveUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = state.receiveUrl;
+      link.download = filename || "download";
+      link.rel = "noopener";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => {
+        if (state.receiveUrl) URL.revokeObjectURL(state.receiveUrl);
+        state.receiveUrl = null;
+        state.receiveChunks = [];
+      }, 60000);
+    }
+
+    function failReceive(message) {
+      state.receiving = false;
+      ui.downloadBtn.disabled = false;
+      setStatus("receive", message, "error");
+      cleanupPeer("receiverPeer");
+    }
+
+    ui.sendTab.addEventListener("click", () => setMode("send"));
+    ui.receiveTab.addEventListener("click", () => setMode("receive"));
+    ui.fileInput.addEventListener("change", (event) => selectFile(event.target.files[0]));
+    ui.changeFileBtn.addEventListener("click", () => ui.fileInput.click());
+    ui.downloadBtn.addEventListener("click", receiveFile);
+
+    ui.passcodeInput.addEventListener("input", () => {
+      ui.passcodeInput.value = ui.passcodeInput.value.replace(/\D/g, "").slice(0, CONFIG.PASSCODE_LENGTH);
+    });
+    ui.passcodeInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") receiveFile();
+    });
+
+    ["dragenter", "dragover"].forEach((name) => ui.dropzone.addEventListener(name, (event) => {
+      event.preventDefault();
+      ui.dropzone.classList.add("dragging");
+    }));
+    ["dragleave", "drop"].forEach((name) => ui.dropzone.addEventListener(name, (event) => {
+      event.preventDefault();
+      ui.dropzone.classList.remove("dragging");
+    }));
+    ui.dropzone.addEventListener("drop", (event) => selectFile(event.dataTransfer.files[0]));
+
+    window.addEventListener("beforeunload", () => {
+      cleanupPeer("senderPeer");
+      cleanupPeer("receiverPeer");
+      if (state.receiveUrl) URL.revokeObjectURL(state.receiveUrl);
+    });
+  </script>
+</body>
+</html>
