@@ -1,186 +1,83 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>极简 P2P 临时文件直传</title>
-  <!-- 引入 WebRTC 信令库 PeerJS -->
-  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: #f4f6f9; color: #333; padding: 20px;
-      max-width: 500px; margin: 0 auto;
-    }
-    .card {
-      background: white; border-radius: 12px; padding: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px;
-    }
-    h2 { font-size: 18px; margin-bottom: 15px; color: #1a1a1a; }
-    .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-    .tab-btn {
-      flex: 1; padding: 10px; border: none; background: #e9ecef;
-      border-radius: 8px; font-weight: bold; cursor: pointer; color: #666;
-    }
-    .tab-btn.active { background: #007aff; color: white; }
-    .passcode-display {
-      font-size: 32px; font-weight: bold; letter-spacing: 4px;
-      color: #007aff; text-align: center; margin: 15px 0; background: #f0f7ff;
-      padding: 10px; border-radius: 8px;
-    }
-    input[type="file"], input[type="text"] {
-      width: 100%; padding: 12px; border: 1px solid #ccc;
-      border-radius: 8px; margin-bottom: 12px; font-size: 16px; outline: none;
-    }
-    .btn {
-      width: 100%; padding: 12px; background: #007aff; color: white;
-      border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;
-    }
-    .btn:disabled { background: #ccc; cursor: not-allowed; }
-    .status { margin-top: 10px; font-size: 14px; color: #666; text-align: center; }
-    .tag { font-size: 12px; color: #34c759; text-align: center; margin-bottom: 15px; }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#f6f7f9">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Debt Focus</title>
+<style>
+:root{--bg:#f4f4f4;--card:#fff;--ink:#050505;--muted:#686868;--line:#dedede;--blue:#050505;--blue2:#f0f0f0;--green:#050505;--green2:#f0f0f0;--red:#d40000;--red2:#fff0f0;--amber:#d40000;--amber2:#fff0f0;--r:18px;--safe-b:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Microsoft YaHei",sans-serif}body{display:flex;justify-content:center}.app{width:100%;max-width:430px;min-height:100dvh;padding-bottom:calc(82px + var(--safe-b))}.head{position:sticky;top:0;z-index:10;padding:calc(12px + env(safe-area-inset-top,0px)) 16px 12px;background:rgba(246,247,249,.94);backdrop-filter:blur(18px)}.headrow{display:flex;align-items:center;justify-content:space-between}.brand{font-size:20px;font-weight:780;letter-spacing:-.3px}.small{font-size:12px;color:var(--muted)}.iconbtn{border:0;background:#fff;width:38px;height:38px;border-radius:12px;font-size:18px;box-shadow:none;border:1px solid var(--line)}main{padding:0 14px}.hero{background:#000;color:#fff;border-radius:18px;padding:18px;margin:4px 0 14px;box-shadow:none}.hero .label{font-size:12px;opacity:.72}.hero .amount{font-size:34px;font-weight:850;color:#ff2a2a;letter-spacing:-1px;margin:5px 0 12px}.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.metric{background:rgba(255,255,255,.1);border-radius:14px;padding:11px}.metric b{display:block;font-size:16px;margin-top:3px}.notice{display:none;margin:0 0 12px;padding:11px 13px;border-radius:13px;background:var(--amber2);color:var(--amber);font-size:13px}.section{margin:18px 2px 9px;display:flex;align-items:end;justify-content:space-between}.section h2{font-size:16px;margin:0}.section span{font-size:12px;color:var(--muted)}.list{display:grid;gap:8px}.account-tools{display:grid;grid-template-columns:1fr auto;gap:8px;margin:0 0 12px}.account-search{height:42px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:0 12px;font-size:14px}.account-count{min-width:72px;height:42px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:12px;font-weight:750}.account-group{margin-bottom:16px}.account-group .section{margin-top:14px}.debt{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}.debt{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}.topline{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.name{font-size:16px;font-weight:750}.pill{font-size:11px;font-weight:700;padding:4px 8px;border-radius:999px;white-space:nowrap}.pill.normal,.pill.plan{color:#000;background:#f0f0f0;border:1px solid #d8d8d8}.balance{font-size:24px;font-weight:820;margin-top:10px;color:var(--red)}.meta{font-size:12px;color:var(--muted);margin-top:4px}.progress{height:6px;background:#eef0f4;border-radius:8px;overflow:hidden;margin-top:11px}.progress i{display:block;height:100%;background:#000;border-radius:8px}.debt.plan .progress i{background:#000}.actions{display:grid;grid-template-columns:1.25fr 1fr 38px;gap:8px;margin-top:13px}.btn{border:0;border-radius:12px;min-height:42px;padding:0 12px;font-size:14px;font-weight:700}.btn:active{transform:scale(.985)}.primary{background:#000;color:#fff}.debt.plan .primary{background:#000}.soft{background:#f0f2f5;color:#4e5665}.danger{background:var(--red2);color:var(--red)}.full{width:100%}.empty{padding:28px 12px;text-align:center;color:var(--muted);background:#fff;border:1px dashed #d9dce3;border-radius:var(--r);font-size:13px}.fab{position:fixed;right:max(18px,calc((100vw - 430px)/2 + 18px));bottom:calc(84px + var(--safe-b));width:52px;height:52px;border:0;border-radius:17px;background:#000;color:#fff;font-size:26px;box-shadow:0 10px 25px rgba(0,0,0,.2)}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;display:grid;grid-template-columns:1fr 1fr 1fr;background:rgba(255,255,255,.97);backdrop-filter:blur(18px);border-top:1px solid var(--line);padding:8px 12px calc(8px + var(--safe-b));z-index:15}.nav button{border:0;background:transparent;color:var(--muted);padding:8px;font-size:12px;font-weight:700}.nav button.active{color:#000;border-bottom:2px solid #000}.page{display:none}.page.active{display:block}.ai-card,.settings{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:15px;margin-bottom:12px}.ai-card h2,.settings h2{font-size:16px;margin:0 0 5px}.textarea,input,select{width:100%;border:1px solid #dfe2e8;background:#fafbfc;border-radius:12px;padding:12px;font-size:15px;color:var(--ink);outline:0}.textarea{min-height:120px;resize:vertical}.textarea:focus,input:focus,select:focus{border-color:var(--blue);background:#fff}.field{margin-top:12px}.field label{display:block;font-size:12px;color:var(--muted);font-weight:650;margin-bottom:6px}.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.result{white-space:pre-wrap;font-size:13px;line-height:1.65;background:#f6f8fb;border-radius:12px;padding:12px;margin-top:12px;display:none}.hint{font-size:12px;color:var(--muted);line-height:1.55;margin-top:8px}.bar{display:flex;gap:8px;margin-top:12px}.bar .btn{flex:1}.overlay{position:fixed;inset:0;z-index:40;background:rgba(12,18,28,.45);display:none;align-items:flex-end;justify-content:center}.overlay.show{display:flex}.sheet{width:100%;max-width:430px;max-height:92dvh;overflow:auto;background:#fff;border-radius:24px 24px 0 0;padding:18px 16px calc(20px + var(--safe-b))}.sheet-head{display:flex;justify-content:space-between;align-items:center}.sheet h2{font-size:18px;margin:0}.close{border:0;background:#f0f2f5;border-radius:50%;width:32px;height:32px}.switch{display:flex;align-items:center;gap:9px;font-size:13px}.switch input{width:auto}.hide{display:none!important}@media(max-width:360px){.hero .amount{font-size:29px}.balance{font-size:21px}.actions{grid-template-columns:1fr 1fr 38px}main{padding:0 10px}.head{padding-left:12px;padding-right:12px}}@media(min-width:600px){body{background:#e9ebef}.app{background:var(--bg);box-shadow:0 0 45px rgba(0,0,0,.08)}}
+.chat-shell{display:block;padding-bottom:16px}.chat-title{font-size:18px;font-weight:800;padding:8px 2px 12px}.chat-stream{display:flex;align-items:flex-start;padding:0 0 10px}.chat-bubble{max-width:100%;background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 14px;font-size:14px;line-height:1.65;color:#222}.chat-compose{position:relative;bottom:auto;margin:0;border:1px solid #d8d8d8;border-radius:14px;background:#fff;box-shadow:none}.chat-compose .textarea{min-height:132px;background:#fff;border:0;border-top:1px solid #ececec;border-radius:0;padding:14px}.chat-compose .bar{grid-template-columns:1fr 1fr;padding:0 12px 12px;margin-top:0}.chat-compose .result{border-left:3px solid #d40000;background:#fafafa}.chat-compose #applyAI{background:#d40000}.mention-wrap{position:relative}.mention-menu{display:none;position:absolute;left:0;right:0;bottom:calc(100% + 8px);z-index:30;max-height:260px;overflow:auto;background:#fff;border:1px solid #cfcfcf;border-radius:14px;padding:6px;box-shadow:0 12px 30px rgba(0,0,0,.12)}.mention-menu.show{display:block}.mention-item{width:100%;border:0;background:#fff;border-radius:10px;padding:10px 11px;text-align:left;display:grid;grid-template-columns:1fr auto;gap:8px;color:#000}.mention-item:active,.mention-item.active{background:#f0f0f0}.mention-item b{font-size:14px}.mention-item span{font-size:12px;color:#666}.mention-empty{padding:14px;text-align:center;color:#777;font-size:13px}.mention-tip{padding:0 14px 9px;font-size:12px;color:#666}.mention-tip b{color:#000}.account-token{display:inline-block;background:#000;color:#fff;border-radius:6px;padding:1px 5px}.plan-preview{background:#fff;border:1px solid #d8d8d8;border-radius:14px;padding:14px;margin-top:12px}.plan-preview-head{display:flex;justify-content:space-between;gap:10px;font-weight:800}.plan-preview-amount{font-size:24px;font-weight:850;color:#d40000;margin:10px 0 4px}.plan-preview-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.plan-preview-cell{background:#f3f3f3;border-radius:10px;padding:9px;font-size:12px;color:#555}.plan-preview-cell b{display:block;color:#000;font-size:14px;margin-top:3px}.plan-preview-bar{height:8px;background:#e7e7e7;border-radius:8px;overflow:hidden;margin-top:12px}.plan-preview-bar i{display:block;height:100%;background:#d40000}.plan-preview-note{font-size:12px;color:#666;margin-top:8px}.settings .primary{background:#000}.iconbtn{color:#000}.notice{border-left:3px solid #d40000}.field input:focus,.field select:focus,.textarea:focus{border-color:#000}.fab{background:#000}.section h2,.brand{color:#000}</style>
 </head>
 <body>
-
-  <h2 style="text-align: center; margin-bottom: 5px;">⚡ 隐私 P2P 文件直传</h2>
-  <div class="tag">🔒 0服务器存储 · 点对点加密传输</div>
-
-  <div class="tabs">
-    <button class="tab-btn active" onclick="switchMode('send')">📤 我要发送</button>
-    <button class="tab-btn" onclick="switchMode('receive')">📥 我要接收</button>
-  </div>
-
-  <!-- 发送面板 -->
-  <div id="sendPanel" class="card">
-    <h2>1. 选择要发送的文件</h2>
-    <input type="file" id="fileInput">
-    
-    <h2>2. 获得取件码 (Passcode)</h2>
-    <div id="passcodeBox" class="passcode-display">------</div>
-    <div class="status" id="sendStatus">等待选择文件并生成取件码...</div>
-  </div>
-
-  <!-- 接收面板 -->
-  <div id="receivePanel" class="card" style="display: none;">
-    <h2>输入 6 位取件码</h2>
-    <input type="text" id="passcodeInput" placeholder="例如: 482910" maxlength="6">
-    <button class="btn" id="downloadBtn" onclick="receiveFile()">连接并下载</button>
-    <div class="status" id="receiveStatus"></div>
-  </div>
-
-  <script>
-    const PREFIX = "myp2pfile-"; // 防止命名冲突的前缀
-    let peer = null;
-    let selectedFile = null;
-
-    // 通用的 STUN 服务器配置，多公共节点可大幅提升 NAT 防火墙穿透成功率
-    const iceConfig = {
-      config: {
-        iceServers: [
-          { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' },
-          { urls: 'stun:global.stun.twilio.com:3478' }
-        ]
-      }
-    };
-
-    function switchMode(mode) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      if (mode === 'send') {
-        document.querySelectorAll('.tab-btn')[0].classList.add('active');
-        document.getElementById('sendPanel').style.display = 'block';
-        document.getElementById('receivePanel').style.display = 'none';
-      } else {
-        document.querySelectorAll('.tab-btn')[1].classList.add('active');
-        document.getElementById('sendPanel').style.display = 'none';
-        document.getElementById('receivePanel').style.display = 'block';
-      }
-    }
-
-    // --- 发送端逻辑 ---
-    document.getElementById('fileInput').addEventListener('change', (e) => {
-      selectedFile = e.target.files[0];
-      if (!selectedFile) return;
-
-      const code = Math.floor(100000 + Math.random() * 900000).toString();
-      document.getElementById('passcodeBox').innerText = code;
-      document.getElementById('sendStatus').innerText = "⏳ 正在等待接收方连接，请勿关闭或锁定网页...";
-
-      if (peer) peer.destroy();
-      
-      // 建立 Peer 连接并注入 STUN 配置
-      peer = new Peer(PREFIX + code, iceConfig);
-
-      peer.on('connection', (conn) => {
-        document.getElementById('sendStatus').innerText = "⚡ 接收方已连接，正在直传文件...";
-        
-        conn.on('open', () => {
-          conn.send({
-            name: selectedFile.name,
-            type: selectedFile.type,
-            data: selectedFile
-          });
-        });
-
-        setTimeout(() => {
-          document.getElementById('sendStatus').innerText = "✅ 文件传输完成！";
-        }, 1000);
-      });
-
-      peer.on('error', (err) => {
-        console.error(err);
-        document.getElementById('sendStatus').innerText = "❌ 连接建立失败，请刷新页面重试";
-      });
-    });
-
-    // --- 接收端逻辑 ---
-    function receiveFile() {
-      const code = document.getElementById('passcodeInput').value.trim();
-      const status = document.getElementById('receiveStatus');
-      const btn = document.getElementById('downloadBtn');
-
-      if (code.length !== 6) {
-        alert("请输入完整的 6 位取件码");
-        return;
-      }
-
-      status.innerText = "⏳ 正在寻找设备并建立直连...";
-      btn.disabled = true;
-
-      // 创建接收方临时 Peer 并注入 STUN 配置
-      const rxPeer = new Peer(iceConfig);
-
-      rxPeer.on('open', () => {
-        const conn = rxPeer.connect(PREFIX + code);
-
-        conn.on('open', () => {
-          status.innerText = "⚡ 已建立连接，正在接收文件...";
-        });
-
-        conn.on('data', (fileMetaData) => {
-          status.innerText = "✅ 接收完成，正在触发下载...";
-
-          const blob = new Blob([fileMetaData.data], { type: fileMetaData.type });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = fileMetaData.name;
-          a.click();
-          URL.revokeObjectURL(url);
-
-          btn.disabled = false;
-          rxPeer.destroy();
-        });
-      });
-
-      rxPeer.on('error', (err) => {
-        console.error(err);
-        status.innerText = "❌ 连接超时：请确认发送端已选择文件，且双方未处于严格受限的局域网下。";
-        btn.disabled = false;
-      });
-    }
-  </script>
-</body>
-</html>
+<div class="app">
+<header class="head"><div class="headrow"><div><div class="brand">Debt Focus</div><div class="small" id="saveState">已本地保存</div></div><button class="iconbtn" id="backupBtn" aria-label="备份">⇩</button></div></header>
+<main>
+<section class="page active" id="inputPage">
+<div class="chat-shell"><div class="chat-title">债务状态输入</div><div class="chat-stream"><div class="chat-bubble">一次可输入多笔分期。请写平台、账户尾号或别名、总额、每期金额、已还期数和下期日期。系统会自动命名、匹配旧账户并生成多笔预览。</div></div><div class="ai-card chat-compose"><h2 style="padding:12px 14px 8px;margin:0">输入更新</h2><div class="hint" style="padding:0 14px 10px;margin:0">输入后先预览，确认后再写入本地。</div><div class="field mention-wrap"><div class="mention-tip">输入 <b>@</b> 调出已有账户，点击即可插入并锁定归类</div><textarea class="textarea" id="aiInput" placeholder="输入 @ 选择账户，或直接描述多笔新分期"></textarea><div class="mention-menu" id="mentionMenu" role="listbox" aria-label="已有账户"></div></div><div class="bar"><button class="btn soft" id="localParse">快速预览</button><button class="btn primary" id="aiParse">DeepSeek 处理</button></div><div class="result" id="aiResult"></div><button class="btn primary full hide" id="applyAI" style="margin-top:10px">确认应用变更</button></div>
+</div>
+</section>
+<section class="page" id="homePage">
+<div class="hero"><div class="label">当前待还总额</div><div class="amount" id="totalBalance">¥0.00</div><div class="hero-grid"><div class="metric"><span class="label">最近30天应还</span><b id="monthDue">¥0.00</b></div><div class="metric"><span class="label">最近还款日</span><b id="nextDue">暂无</b></div></div></div>
+<div class="notice" id="dueNotice"></div>
+<div class="account-tools"><input class="account-search" id="accountSearch" type="search" placeholder="搜索平台、账户名或尾号"><div class="account-count" id="accountTotal">0 个账户</div></div>
+<div class="section"><h2>未逾期 · 正常还款</h2><span id="normalCount">0 笔</span></div><div class="list" id="normalList"></div>
+<div class="section"><h2>已协商分期</h2><span id="planCount">0 笔</span></div><div class="list" id="planList"></div>
+<div class="section"><h2>其他记录</h2><span id="otherCount">0 笔</span></div><button class="btn soft full" id="toggleOther">展开其他记录</button><div class="list hide" id="otherList" style="margin-top:10px"></div>
+</section>
+<section class="page" id="settingsPage">
+<div class="settings"><h2>DeepSeek 接入</h2><div class="field"><label>API 地址</label><input id="apiEndpoint" value="https://api.deepseek.com/chat/completions"></div><div class="field"><label>模型</label><input id="apiModel" value="deepseek-chat"></div><div class="field"><label>API Key</label><input id="apiKey" type="password" placeholder="sk-...（默认仅保留到本标签页关闭）"></div><div class="field switch"><input id="rememberKey" type="checkbox"><label for="rememberKey">将 API Key 保存在本机 localStorage</label></div><div class="hint">GitHub/Gist 页面是公开静态代码，不要把 API Key 直接写进 HTML 或提交到仓库。更安全的方案是把 API 地址改为自己的 Cloudflare Worker / Vercel Serverless 代理。</div></div>
+<div class="settings"><h2>数据管理</h2><div class="bar"><button class="btn soft" id="exportBtn">导出备份</button><button class="btn soft" id="importBtn">导入备份</button></div><input id="importFile" type="file" accept="application/json" class="hide"><button class="btn danger full" id="clearBtn" style="margin-top:10px">清空全部本地数据</button><div class="hint">支持至少 20 个账户，当前代码不设置账户数量上限。每次新增、编辑、还款和 AI 更新都会立即写入 localStorage。刷新页面不会丢失；清理 Safari 网站数据或更换设备前请导出备份。</div></div>
+</section>
+</main>
+<button class="fab hide" id="addBtn" aria-label="新增债务">＋</button>
+<nav class="nav"><button class="active" data-page="inputPage">输入</button><button data-page="homePage">总览</button><button data-page="settingsPage">设置</button></nav>
+</div>
+<div class="overlay" id="formOverlay"><div class="sheet"><div class="sheet-head"><h2 id="formTitle">新增债务</h2><button class="close" data-close>×</button></div>
+<div class="field"><label>平台名称</label><input id="fName" autocomplete="off"></div><div class="row2"><div class="field"><label>管理类型</label><select id="fType"><option value="normal">未逾期</option><option value="plan">已协商</option><option value="other">其他</option></select></div><div class="field"><label>当前余额</label><input id="fBalance" type="number" min="0" step="0.01" inputmode="decimal"></div></div>
+<div class="row2"><div class="field"><label>每期还款</label><input id="fPayment" type="number" min="0" step="0.01" inputmode="decimal"></div><div class="field"><label>下次还款日</label><input id="fDue" type="date"></div></div>
+<div class="row2"><div class="field"><label>总期数</label><input id="fTotal" type="number" min="0" step="1" inputmode="numeric"></div><div class="field"><label>剩余期数</label><input id="fRemain" type="number" min="0" step="1" inputmode="numeric"></div></div>
+<div class="field"><label>备注</label><input id="fNote" autocomplete="off"></div><div class="bar"><button class="btn danger hide" id="deleteBtn">删除</button><button class="btn primary" id="saveBtn">保存并写入本地</button></div></div></div>
+<script>
+(function(){'use strict';
+const KEY='debt_focus_v2',OLD='debt_manager_v1',CFG='debt_focus_cfg';let debts=[],editId=null,pendingAI=null,otherOpen=false,accountQuery='',mentionStart=-1,mentionMatches=[],mentionActive=0;
+const $=s=>document.querySelector(s),$$=s=>Array.from(document.querySelectorAll(s));
+const money=n=>'¥'+(Number(n)||0).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function normalize(d){let type=d.type;if(!type)type=d.status==='正在还'?'normal':d.status==='已协商分期'?'plan':'other';let balance=d.balance;if(balance==null)balance=type==='normal'?(d.repayBalance||d.amount):type==='plan'?(d.remainAmount||d.totalAmount||d.amount):d.amount;return{id:d.id||uid(),name:String(d.name||'未命名'),provider:String(d.provider||''),accountRef:String(d.accountRef||''),accountKey:String(d.accountKey||''),type:type,balance:Math.max(0,Number(balance)||0),payment:Math.max(0,Number(d.payment!=null?d.payment:(type==='normal'?d.repayPeriodAmount:d.periodAmount))||0),due:d.due||(type==='normal'?d.repayDueDate:d.nextDueDate)||'',total:Math.max(0,parseInt(d.total!=null?d.total:(type==='normal'?d.repayTotalPeriods:d.totalPeriods),10)||0),remain:Math.max(0,parseInt(d.remain!=null?d.remain:(type==='normal'?d.repayRemainPeriods:((d.totalPeriods||0)-(d.paidPeriods||0))),10)||0),note:String(d.note||d.remark||''),updatedAt:d.updatedAt||new Date().toISOString()}}
+function load(){try{let v=JSON.parse(localStorage.getItem(KEY)||'null');if(Array.isArray(v))return v.map(normalize);let old=JSON.parse(localStorage.getItem(OLD)||'null');if(Array.isArray(old)){let migrated=old.map(normalize);localStorage.setItem(KEY,JSON.stringify(migrated));return migrated}}catch(e){}return[]}
+function persist(){localStorage.setItem(KEY,JSON.stringify(debts));$('#saveState').textContent='已本地保存 · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});render()}
+function daysUntil(s){if(!s)return 99999;let a=new Date();a.setHours(0,0,0,0);let b=new Date(s+'T00:00:00');return Math.round((b-a)/86400000)}
+function card(d){let done=d.total>0?Math.max(0,Math.min(100,(d.total-d.remain)/d.total*100)):0;return `<article class="debt ${d.type}"><div class="topline"><div><div class="name">${esc(d.name)}</div>${d.note?`<div class="meta">${esc(d.note)}</div>`:''}</div><span class="pill ${d.type}">${d.type==='normal'?'未逾期':d.type==='plan'?'已协商':'其他'}</span></div><div class="balance">${money(d.balance)}</div><div class="meta">${d.payment?'每期 '+money(d.payment):'未设置每期金额'}${d.due?' · 下期 '+esc(d.due):''}${d.remain?' · 剩余 '+d.remain+' 期':''}</div><div class="progress"><i style="width:${done}%"></i></div><div class="actions"><button class="btn primary" data-pay="${d.id}">快速还款</button><button class="btn soft" data-edit="${d.id}">暴力编辑</button><button class="btn danger" data-del="${d.id}">×</button></div></article>`}
+function render(){let active=debts.filter(d=>d.type==='normal'||d.type==='plan'),total=active.reduce((s,d)=>s+d.balance,0),soon=active.filter(d=>daysUntil(d.due)>=0&&daysUntil(d.due)<=30).reduce((s,d)=>s+d.payment,0),dates=active.filter(d=>d.due&&daysUntil(d.due)>=0).sort((a,b)=>a.due.localeCompare(b.due));$('#totalBalance').textContent=money(total);$('#monthDue').textContent=money(soon);$('#nextDue').textContent=dates.length?dates[0].due.slice(5):'暂无';$('#accountTotal').textContent=debts.length+' 个账户';let urgent=active.filter(d=>daysUntil(d.due)>=0&&daysUntil(d.due)<=7);$('#dueNotice').style.display=urgent.length?'block':'none';$('#dueNotice').textContent=urgent.length?`未来 7 天有 ${urgent.length} 笔还款，请核对余额。`:'';let q=normText(accountQuery);for(let t of ['normal','plan','other']){let all=debts.filter(d=>d.type===t),a=q?all.filter(d=>normText([d.name,d.provider,d.accountRef,d.note].join(' ')).includes(q)):all;$('#'+t+'Count').textContent=q?(a.length+'/'+all.length+' 笔'):all.length+' 笔';$('#'+t+'List').innerHTML=a.length?a.map(card).join(''):'<div class="empty">'+(q?'没有匹配账户':'暂无记录')+'</div>'}$('#otherList').classList.toggle('hide',!otherOpen);$('#toggleOther').textContent=otherOpen?'收起其他记录':'展开其他记录'}
+function openForm(id){editId=id||null;let d=id?debts.find(x=>x.id===id):normalize({name:'',type:'normal',balance:0});$('#formTitle').textContent=id?'暴力手动更新':'新增债务';$('#fName').value=d.name;$('#fType').value=d.type;$('#fBalance').value=d.balance||'';$('#fPayment').value=d.payment||'';$('#fDue').value=d.due||'';$('#fTotal').value=d.total||'';$('#fRemain').value=d.remain||'';$('#fNote').value=d.note||'';$('#deleteBtn').classList.toggle('hide',!id);$('#formOverlay').classList.add('show')}
+function closeForm(){$('#formOverlay').classList.remove('show');editId=null}
+function saveForm(){let name=$('#fName').value.trim();if(!name)return alert('请输入平台名称');let d=editId?debts.find(x=>x.id===editId):{id:uid()};Object.assign(d,{name,type:$('#fType').value,balance:Math.max(0,Number($('#fBalance').value)||0),payment:Math.max(0,Number($('#fPayment').value)||0),due:$('#fDue').value,total:Math.max(0,parseInt($('#fTotal').value,10)||0),remain:Math.max(0,parseInt($('#fRemain').value,10)||0),note:$('#fNote').value.trim(),updatedAt:new Date().toISOString()});if(!editId)debts.unshift(d);closeForm();persist()}
+function quickPay(id){let d=debts.find(x=>x.id===id);if(!d)return;let def=d.payment||0;let raw=prompt('输入本次实际还款金额',def||'');if(raw===null)return;let amt=Number(raw);if(!(amt>0))return alert('请输入有效金额');d.balance=Math.max(0,Math.round((d.balance-amt)*100)/100);if(d.remain>0)d.remain--;if(d.due){let x=new Date(d.due+'T00:00:00'),day=x.getDate();x.setDate(1);x.setMonth(x.getMonth()+1);let last=new Date(x.getFullYear(),x.getMonth()+1,0).getDate();x.setDate(Math.min(day,last));d.due=x.toISOString().slice(0,10)}d.updatedAt=new Date().toISOString();persist()}
+function mentionLabel(d){return d.name+(d.accountRef&&!d.name.includes(d.accountRef)?' · '+d.accountRef:'')}
+function closeMention(){mentionStart=-1;mentionMatches=[];mentionActive=0;$('#mentionMenu').classList.remove('show')}
+function renderMention(query){let q=normText(query);mentionMatches=debts.filter(d=>!q||normText([d.name,d.provider,d.accountRef,d.note].join(' ')).includes(q)).slice(0,30);mentionActive=Math.min(mentionActive,Math.max(0,mentionMatches.length-1));$('#mentionMenu').innerHTML=mentionMatches.length?mentionMatches.map((d,i)=>`<button type="button" class="mention-item ${i===mentionActive?'active':''}" data-mention-id="${d.id}" role="option"><b>@${esc(mentionLabel(d))}</b><span>${money(d.balance)}</span></button>`).join(''):'<div class="mention-empty">没有匹配账户，可直接输入新账户信息</div>';$('#mentionMenu').classList.add('show')}
+function detectMention(){let el=$('#aiInput'),pos=el.selectionStart||0,before=el.value.slice(0,pos),m=before.match(/(?:^|[\s；;，,\n])@([^@\s；;，,\n]*)$/);if(!m){closeMention();return}mentionStart=pos-m[1].length-1;renderMention(m[1])}
+function insertMention(id){let d=debts.find(x=>x.id===id);if(!d||mentionStart<0)return;let el=$('#aiInput'),end=el.selectionStart||mentionStart+1,label='@'+mentionLabel(d)+'{#'+d.id+'} ';el.value=el.value.slice(0,mentionStart)+label+el.value.slice(end);let pos=mentionStart+label.length;el.focus();el.setSelectionRange(pos,pos);closeMention()}
+function resolveMentionIds(text){let ids=[...text.matchAll(/\{#([^}]+)\}/g)].map(m=>m[1]);return ids}
+function localParse(text){let result=[];debts.forEach(d=>{if(!text.includes(d.name))return;let p={id:d.id,name:d.name};let m=text.match(/(?:余额(?:变成|为|剩余)?|剩余欠款)\s*[¥￥]?\s*([\d,.]+)/);if(m)p.balance=Number(m[1].replace(/,/g,''));let pay=text.match(/(?:还了|还款)\s*[¥￥]?\s*([\d,.]+)/);if(pay&&!m)p.balance=Math.max(0,d.balance-Number(pay[1].replace(/,/g,'')));let date=text.match(/(20\d{2})[-/.年](\d{1,2})[-/.月](\d{1,2})日?|(?:下期|还款日)[^\d]*(\d{1,2})月(\d{1,2})日/);if(date)p.due=date[1]?`${date[1]}-${String(date[2]).padStart(2,'0')}-${String(date[3]).padStart(2,'0')}`:`${new Date().getFullYear()}-${String(date[4]).padStart(2,'0')}-${String(date[5]).padStart(2,'0')}`;if(/已协商|协商分期/.test(text))p.type='plan';if(/未逾期|正常还款|正在还/.test(text))p.type='normal';result.push(p)});return result}
+function normText(v){return String(v||'').toLowerCase().replace(/分期|借款|账户|账号|白条|金融|消费金融|app|\s|[-_（）()]/g,'')}
+function makeKey(provider,ref){return normText(provider)+(ref?':'+String(ref).replace(/\D/g,'').slice(-8):'')}
+function findExisting(c){if(c.id){let x=debts.find(d=>d.id===c.id);if(x)return x}let key=c.accountKey||makeKey(c.provider||c.name,c.accountRef);if(key){let x=debts.find(d=>d.accountKey===key);if(x)return x}let base=normText(c.provider||c.name);let hits=debts.filter(d=>normText(d.provider||d.name)===base);return hits.length===1?hits[0]:null}
+function uniqueName(c,existing){if(existing)return existing.name;let provider=String(c.provider||c.name||'分期').trim(),ref=String(c.accountRef||'').replace(/\s/g,'');let base=ref?provider+' · '+ref:provider;let names=new Set(debts.map(d=>d.name));if(!names.has(base))return base;let n=2;while(names.has(base+' '+n))n++;return base+' '+n}
+function reconcileChanges(items){let seen=new Map(),out=[];(Array.isArray(items)?items:[]).forEach(raw=>{let c={...raw},existing=findExisting(c);if(existing){c.id=existing.id;c.action='update';c.name=existing.name;c.provider=c.provider||existing.provider||existing.name;c.accountRef=c.accountRef||existing.accountRef||'';c.accountKey=existing.accountKey||makeKey(c.provider,c.accountRef)}else{c.action='create';c.provider=c.provider||c.name||'分期';c.accountRef=c.accountRef||'';c.accountKey=makeKey(c.provider,c.accountRef);c.name=uniqueName(c,null)}let identity=c.id||c.accountKey||normText(c.name);if(seen.has(identity)){Object.assign(seen.get(identity),c)}else{seen.set(identity,c);out.push(c)}});return out}
+function calcPreview(c){let old=findExisting(c),total=Math.max(0,Number(c.total!=null?c.total:(old?.total||0))||0),payment=Math.max(0,Number(c.payment!=null?c.payment:(old?.payment||0))||0),original=Math.max(0,Number(c.originalAmount!=null?c.originalAmount:0)||0),paidInput=c.paidPeriods!=null?Math.max(0,Number(c.paidPeriods)||0):null;if(!total&&original&&payment)total=Math.ceil(original/payment);let remain=c.remain!=null?Math.max(0,Number(c.remain)||0):(paidInput!=null?Math.max(0,total-paidInput):(old?.remain!=null?old.remain:total));let balance=c.balance!=null?Math.max(0,Number(c.balance)||0):(original?(paidInput!=null?Math.max(0,original-payment*paidInput):original):(old?.balance||0));let paid=Math.max(0,total-remain),pct=total?Math.min(100,Math.max(0,paid/total*100)):0;return{original:original||(payment*total)||balance,total,remain,payment,balance,paid,pct}}
+function showPreview(changes){changes=reconcileChanges(changes);pendingAI=changes;$('#aiResult').style.display='block';if(!changes.length){$('#aiResult').innerHTML='没有识别到有效分期。请按“平台 + 账户尾号/别名 + 总额 + 每期金额”描述。';$('#applyAI').classList.add('hide');return}$('#aiResult').innerHTML='<div class="plan-preview-note">共识别 '+changes.length+' 笔，请逐笔核对</div>'+changes.map(c=>{let p=calcPreview(c),action=c.action==='create'?'新增':'更新已有账户';return `<div class="plan-preview"><div class="plan-preview-head"><span>${esc(c.name)}</span><span>${action}</span></div><div class="plan-preview-amount">${money(p.balance)}</div><div class="plan-preview-grid"><div class="plan-preview-cell">分期总额<b>${money(p.original)}</b></div><div class="plan-preview-cell">每期金额<b>${money(p.payment)}</b></div><div class="plan-preview-cell">总期数<b>${p.total||'待确认'} 期</b></div><div class="plan-preview-cell">已还 / 剩余<b>${p.paid} / ${p.remain} 期</b></div></div><div class="plan-preview-bar"><i style="width:${p.pct}%"></i></div><div class="plan-preview-note">进度 ${p.pct.toFixed(1)}%${c.due?' · 下期 '+esc(c.due):''}</div></div>`}).join('');$('#applyAI').classList.remove('hide')}
+async function deepSeek(){let text=$('#aiInput').value.trim(),key=$('#apiKey').value.trim();if(!text)return alert('请输入一笔或多笔分期');if(!key)return alert('请在设置中输入 DeepSeek API Key');let endpoint=$('#apiEndpoint').value.trim(),model=$('#apiModel').value.trim()||'deepseek-chat';let safe=debts.map(d=>({id:d.id,name:d.name,provider:d.provider,accountRef:d.accountRef,accountKey:d.accountKey,type:d.type,balance:d.balance,payment:d.payment,due:d.due,total:d.total,remain:d.remain,note:d.note})),mentionedIds=resolveMentionIds(text);$('#aiResult').style.display='block';$('#aiResult').textContent='正在整理多笔分期…';$('#applyAI').classList.add('hide');let instruction='你是本网页内置的分期债务结构化处理器，不是聊天助手。一次解析用户文本中的全部分期，每笔输出一个对象。只输出严格 JSON，格式为 {"changes":[]}，不要 markdown。字段：action,id,provider,accountRef,accountKey,name,type,originalAmount,balance,payment,total,paidPeriods,remain,due,note。type 固定 plan。账户识别规则：优先使用现有 id；其次用 provider+accountRef 匹配；同平台且只有一个现有账户时允许匹配；不得为同一账户重复 create。新账户 action=create，名称 name 自动使用“平台 · 尾号/别名”；没有尾号则使用平台名。更新账户 action=update 并保留现有 id 和 name。计算规则：total 未提供时为 ceil(originalAmount/payment)；remain=total-paidPeriods；balance 未提供时为 max(0,originalAmount-payment*paidPeriods)。金额是数字，日期 YYYY-MM-DD。用户用分号、换行或编号描述多笔时必须全部解析。文本中的 @{#id} 是用户明确选择的现有账户，必须归类到该 id，不得新建。明确选择的账户ID：'+JSON.stringify(mentionedIds)+'。现有账户：'+JSON.stringify(safe);try{let res=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model,messages:[{role:'system',content:instruction},{role:'user',content:text}],temperature:0,response_format:{type:'json_object'}})});if(!res.ok)throw new Error('HTTP '+res.status);let data=await res.json(),content=data.choices?.[0]?.message?.content||'{"changes":[]}',parsed=JSON.parse(content);showPreview(parsed.changes||parsed.updates||(Array.isArray(parsed)?parsed:[]))}catch(e){$('#aiResult').textContent='识别失败：'+e.message+'。请检查 API Key、接口地址或网络。'}}
+function applyChanges(){if(!pendingAI?.length)return;pendingAI.forEach(c=>{let d=findExisting(c),p=calcPreview(c);if(!d){d=normalize({id:uid(),name:c.name,type:'plan'});debts.unshift(d)}d.name=c.name||d.name;d.provider=c.provider||d.provider||d.name;d.accountRef=c.accountRef||d.accountRef||'';d.accountKey=c.accountKey||d.accountKey||makeKey(d.provider,d.accountRef);d.type='plan';d.balance=p.balance;d.payment=p.payment;d.total=p.total;d.remain=p.remain;if(c.due!==undefined)d.due=c.due;if(c.note!==undefined)d.note=c.note;d.updatedAt=new Date().toISOString()});let count=pendingAI.length;pendingAI=null;$('#applyAI').classList.add('hide');$('#aiResult').innerHTML='<div class="plan-preview-note">已处理 '+count+' 笔，并写入本地总览。</div>';$('#aiInput').value='';persist()}
+function exportData(){let blob=new Blob([JSON.stringify({version:2,exportedAt:new Date().toISOString(),debts},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='debt-focus-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function saveCfg(){let c={endpoint:$('#apiEndpoint').value,model:$('#apiModel').value,remember:$('#rememberKey').checked};if(c.remember)c.key=$('#apiKey').value;localStorage.setItem(CFG,JSON.stringify(c));if(!c.remember)sessionStorage.setItem('debt_focus_key',$('#apiKey').value)}
+function loadCfg(){try{let c=JSON.parse(localStorage.getItem(CFG)||'{}');if(c.endpoint)$('#apiEndpoint').value=c.endpoint;if(c.model)$('#apiModel').value=c.model;$('#rememberKey').checked=!!c.remember;$('#apiKey').value=c.remember?(c.key||''):(sessionStorage.getItem('debt_focus_key')||'')}catch(e){}}
+document.addEventListener('click',e=>{let el=e.target.closest('[data-edit],[data-pay],[data-del]');if(el?.dataset.edit)openForm(el.dataset.edit);if(el?.dataset.pay)quickPay(el.dataset.pay);if(el?.dataset.del&&confirm('确定删除这条债务记录？')){debts=debts.filter(d=>d.id!==el.dataset.del);persist()}});$$('[data-close]').forEach(x=>x.onclick=closeForm);$('#formOverlay').onclick=e=>{if(e.target.id==='formOverlay')closeForm()};$('#addBtn').onclick=()=>openForm();$('#saveBtn').onclick=saveForm;$('#deleteBtn').onclick=()=>{if(editId&&confirm('确定删除？')){debts=debts.filter(d=>d.id!==editId);closeForm();persist()}};$('#toggleOther').onclick=()=>{otherOpen=!otherOpen;render()};$$('.nav button').forEach(b=>b.onclick=()=>{$$('.nav button').forEach(x=>x.classList.toggle('active',x===b));$$('.page').forEach(p=>p.classList.toggle('active',p.id===b.dataset.page));$('#addBtn').classList.toggle('hide',b.dataset.page!=='homePage')});$('#localParse').onclick=()=>showPreview(localParse($('#aiInput').value));$('#aiParse').onclick=deepSeek;$('#applyAI').onclick=applyChanges;$('#exportBtn').onclick=exportData;$('#backupBtn').onclick=exportData;$('#importBtn').onclick=()=>$('#importFile').click();$('#importFile').onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let j=JSON.parse(r.result),a=Array.isArray(j)?j:j.debts;if(!Array.isArray(a))throw 0;if(confirm('导入将覆盖当前数据，是否继续？')){debts=a.map(normalize);persist()}}catch(_){alert('备份文件格式无效')}};r.readAsText(f)};$('#clearBtn').onclick=()=>{if(confirm('此操作会清空全部本地债务数据。确定继续？')){debts=[];persist()}};['apiEndpoint','apiModel','apiKey','rememberKey'].forEach(id=>$('#'+id).addEventListener('change',saveCfg));$('#accountSearch').addEventListener('input',e=>{accountQuery=e.target.value;render()});$('#aiInput').addEventListener('input',detectMention);$('#aiInput').addEventListener('click',detectMention);$('#aiInput').addEventListener('keydown',e=>{if(!$('#mentionMenu').classList.contains('show'))return;if(e.key==='ArrowDown'){e.preventDefault();mentionActive=Math.min(mentionMatches.length-1,mentionActive+1);renderMention('')}else if(e.key==='ArrowUp'){e.preventDefault();mentionActive=Math.max(0,mentionActive-1);renderMention('')}else if(e.key==='Enter'&&mentionMatches[mentionActive]){e.preventDefault();insertMention(mentionMatches[mentionActive].id)}else if(e.key==='Escape'){closeMention()}});$('#mentionMenu').addEventListener('click',e=>{let b=e.target.closest('[data-mention-id]');if(b)insertMention(b.dataset.mentionId)});document.addEventListener('click',e=>{if(!e.target.closest('.mention-wrap'))closeMention()});
+debts=load();loadCfg();render();
+})();
+</script>
+</body></html>
