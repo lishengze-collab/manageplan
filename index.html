@@ -279,6 +279,21 @@ button{font-family:inherit;}
 }
 .check-toolbar button.ghost{color:#888;border-color:#ddd;}
 
+/* ============ 发音 / 选词查询 ============ */
+.pron-row{display:flex;gap:6px;margin-top:8px;}
+.pron-btn{
+  font-size:12px;padding:4px 12px;border-radius:20px;border:1px solid var(--primary);
+  background:var(--white);color:var(--primary);cursor:pointer;
+}
+.pron-btn:active{background:var(--primary-soft);}
+.sel-bar{
+  position:fixed;z-index:200;display:none;background:var(--primary-dark);
+  border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.25);overflow:hidden;
+}
+.sel-bar.active{display:flex;}
+.sel-bar button{background:none;border:none;color:#fff;font-size:14px;padding:10px 16px;cursor:pointer;}
+.sel-bar button + button{border-left:1px solid rgba(255,255,255,.2);}
+
 /* ============ 底部导航 ============ */
 .bottom-nav{
   position:absolute;bottom:calc(16px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
@@ -327,7 +342,7 @@ button{font-family:inherit;}
   <!-- ================= TAB 1 录入 ================= -->
   <div class="content active" id="tab-input">
     <div class="search-container">
-      <div class="icon-add" onclick="openCameraModal()">
+      <div class="icon-add" onclick="document.getElementById('imageInput').click()">
         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
           <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
           <circle cx="12" cy="13" r="4"></circle>
@@ -446,21 +461,15 @@ button{font-family:inherit;}
   </div>
 
   <!-- 隐藏的文件输入 -->
-  <input type="file" id="imageCamera" accept="image/*" capture="environment" style="display:none;" onchange="handleImageUpload(event)">
-  <input type="file" id="imageGallery" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
+  <input type="file" id="imageInput" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
   <input type="file" id="checklistCamera" accept="image/*" capture="environment" style="display:none;" onchange="handleChecklistPhoto(event)">
   <input type="file" id="importFile" style="display:none;" accept=".json" onchange="importData(event)">
 
-  <!-- 相机询问弹窗 -->
-  <div class="modal" id="cameraModal">
-    <div class="modal-content" style="max-height:none;">
-      <div class="modal-header"><span>获取图片</span></div>
-      <div class="modal-body" style="text-align:center; padding:10px 0 20px;">请选择图片来源</div>
-      <div class="modal-footer">
-        <button class="btn-outline" onclick="document.getElementById('imageGallery').click(); closeCameraModal();">相册</button>
-        <button class="btn-primary" onclick="document.getElementById('imageCamera').click(); closeCameraModal();">拍照</button>
-      </div>
-    </div>
+  <!-- 选中单词浮动工具条 -->
+  <div class="sel-bar" id="selBar" onmousedown="event.preventDefault()">
+    <button onclick="lookupWord()">查询</button>
+    <button onclick="speak(selWord,2)">美音</button>
+    <button onclick="speak(selWord,1)">英音</button>
   </div>
 
   <!-- 拍照询问弹窗 (清单) -->
@@ -484,6 +493,8 @@ button{font-family:inherit;}
       </div>
       <div class="modal-body" id="infoBody"></div>
       <div class="modal-footer">
+        <button class="btn-outline" id="infoSpeak" style="display:none;" onclick="speak(this.dataset.w,2)">发音</button>
+        <button class="btn-outline" id="infoAdd" style="display:none;" onclick="addLookupWord()">加入卡片</button>
         <button class="btn-primary" onclick="closeInfoModal()">知道了</button>
       </div>
     </div>
@@ -591,21 +602,188 @@ async function callAI(messages){
 }
 
 /* =========================================================
-   图片弹窗控制
+   图片识别：OCR 提取文字 → AI 提取单词 → 自动生成卡片
 ========================================================= */
-function openCameraModal() { $('cameraModal').classList.add('active'); }
-function closeCameraModal() { $('cameraModal').classList.remove('active'); }
+let tessLoading = null;
+function loadTesseract() {
+    if (window.Tesseract) return Promise.resolve();
+    if (tessLoading) return tessLoading;
+    tessLoading = new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+        s.onload = resolve;
+        s.onerror = () => { tessLoading = null; reject(new Error('OCR 组件加载失败，请检查网络')); };
+        document.head.appendChild(s);
+    });
+    return tessLoading;
+}
 
-function handleImageUpload(event) {
+async function ocrImage(dataUrl, onProgress) {
+    await loadTesseract();
+    const r = await Tesseract.recognize(dataUrl, 'eng', {
+        logger: m => { if (m.status === 'recognizing text') onProgress(Math.round(m.progress * 100)); }
+    });
+    return (r && r.data && r.data.text) || '';
+}
+
+async function extractWordsAI(text) {
+    const prompt = `下面是 OCR 从图片中识别出的文字（可能含错字、乱码、中文释义、序号、音标等噪声）。请提取其中需要学习的英文单词或短语：保持图片中的原样，仅修正明显的 OCR 拼写错误，去重，最多 60 个。只输出 JSON 数组，例如 ["abandon","cognitive"]，不要输出任何其他内容。
+
+${text.slice(0, 4000)}`;
+    const res = await callAI([{role: 'user', content: prompt}]);
+    const m = res.match(/\[[\s\S]*\]/);
+    if (!m) throw new Error('AI 提取失败');
+    let arr;
+    try { arr = JSON.parse(m[0]); } catch (e) { throw new Error('AI 提取失败'); }
+    return [...new Set(arr.map(w => String(w).trim()).filter(w => /^[A-Za-z][A-Za-z\s'-]*$/.test(w)))].slice(0, 60);
+}
+
+async function handleImageUpload(event) {
     const file = event.target.files[0];
+    event.target.value = '';
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-        $('batchInput').value = 'abandon, cognitive';
-        event.target.value = '';
-        alert('图片已识别，单词已填入输入框，请点击“AI 识别生成卡片”。');
+    if (batchRunning) { alert('正在生成中，请稍候'); return; }
+    if (!apiKey) { alert('请先在“设置与统计”中填写 API Key：图片识别后需要 AI 提取单词并生成卡片'); return; }
+
+    $('recognizeStatus').innerHTML = '';
+    const el = addStatusItem('图片识别', 'loading', '读取图片...');
+    batchRunning = true;
+    $('batchBtn').disabled = true;
+    let words_ = [];
+    try {
+        const dataUrl = await compressImage(file, 1600, 0.85);
+        setStatus(el, 'loading', '文字识别中 0%');
+        const text = await ocrImage(dataUrl, p => setStatus(el, 'loading', '文字识别中 ' + p + '%'));
+        if (!text.trim()) throw new Error('未识别到文字');
+        setStatus(el, 'loading', 'AI 提取单词中...');
+        words_ = await extractWordsAI(text);
+        if (!words_.length) throw new Error('未提取到单词');
+        setStatus(el, 'done', '提取 ' + words_.length + ' 个单词');
+    } catch (e) {
+        setStatus(el, 'fail', e.message || '识别失败');
+    }
+    batchRunning = false;
+    $('batchBtn').disabled = false;
+    if (words_.length) {
+        $('batchInput').value = words_.join(', ');
+        processBatch(true); // 自动写入：直接生成卡片
+    }
+}
+
+/* =========================================================
+   发音（联网音频，失败时回退到浏览器语音）
+========================================================= */
+let curAudio = null;
+function stopSpeak() {
+    if (curAudio) { try { curAudio.pause(); } catch (e) {} curAudio = null; }
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+}
+
+function speak(word, type) { // type: 1 英音, 2 美音
+    word = String(word || '').trim();
+    if (!word) return;
+    stopSpeak();
+    let fell = false;
+    const fallback = () => {
+        if (fell) return;
+        fell = true;
+        if (!('speechSynthesis' in window)) { alert('发音失败：网络不可用且浏览器不支持语音'); return; }
+        const u = new SpeechSynthesisUtterance(word);
+        u.lang = type === 1 ? 'en-GB' : 'en-US';
+        u.rate = 0.9;
+        speechSynthesis.speak(u);
     };
-    reader.readAsDataURL(file);
+    const a = new Audio('https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(word) + '&type=' + type);
+    curAudio = a;
+    a.onerror = fallback;
+    const p = a.play();
+    if (p && p.catch) p.catch(fallback);
+}
+
+/* =========================================================
+   选中单词查询
+========================================================= */
+let selWord = '';
+let selTimer = null;
+const hideSelBar = () => $('selBar').classList.remove('active');
+
+function updateSelBar() {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || sel.rangeCount === 0) { hideSelBar(); return; }
+    const text = sel.toString().trim();
+    const n = sel.anchorNode;
+    const el = n && (n.nodeType === 1 ? n : n.parentElement);
+    if (!el || !el.closest('#cardsContainer, #infoBody')) { hideSelBar(); return; }
+    if (!/^[A-Za-z][A-Za-z\s'’-]{0,38}$/.test(text)) { hideSelBar(); return; }
+    selWord = text.replace(/’/g, "'");
+
+    const r = sel.getRangeAt(0).getBoundingClientRect();
+    const bar = $('selBar');
+    bar.classList.add('active');
+    const bw = bar.offsetWidth, bh = bar.offsetHeight;
+    const left = Math.max(8, Math.min(window.innerWidth - bw - 8, r.left + r.width / 2 - bw / 2));
+    let top = r.bottom + 10;
+    if (top + bh > window.innerHeight - 8) top = Math.max(8, r.top - bh - 10);
+    bar.style.left = left + 'px';
+    bar.style.top = top + 'px';
+}
+
+document.addEventListener('selectionchange', () => {
+    clearTimeout(selTimer);
+    selTimer = setTimeout(updateSelBar, 250);
+});
+document.addEventListener('scroll', hideSelBar, true);
+
+async function lookupFree(w) {
+    const r = await fetch('https://api.dictionaryapi.dev/v2/entries/en/' + encodeURIComponent(w));
+    if (!r.ok) throw new Error('未查到该词（短语请配置 API Key 后查询）');
+    const e = (await r.json())[0];
+    let html = `<p><strong>${esc(e.word)}</strong> ${esc(e.phonetic || '')}</p>`;
+    (e.meanings || []).slice(0, 3).forEach(m => {
+        html += `<p><b>${esc(m.partOfSpeech)}</b> ${esc((m.definitions || []).slice(0, 2).map(x => x.definition).join('；'))}</p>`;
+    });
+    return html + '<p style="color:#999;font-size:12px;margin-top:10px;">(未配置 API Key，使用在线英文词典)</p>';
+}
+
+async function lookupWord(word) {
+    const w = String(word || selWord || '').trim();
+    hideSelBar();
+    if (!w) return;
+    try { window.getSelection().removeAllRanges(); } catch (e) {}
+    showInfo(w, '<div style="text-align:center;padding:20px;color:#888;">查询中...</div>', w);
+    let html;
+    try {
+        if (apiKey) {
+            const res = await callAI([{role: 'user', content:
+                `请简明解释英文单词/短语 "${w}"：1）音标；2）词性与中文释义（不超过 3 条）；3）一句英文例句并附中文翻译。纯文本输出，每项一行，不使用 Markdown。`}]);
+            html = esc(res).replace(/\n/g, '<br>');
+        } else {
+            html = await lookupFree(w);
+        }
+    } catch (e) {
+        html = `<span style="color:red;">查询失败：${esc(e.message)}</span>`;
+    }
+    if ($('infoModal').classList.contains('active') && $('infoSpeak').dataset.w === w) showInfo(w, html, w);
+}
+
+async function addLookupWord() {
+    const btn = $('infoAdd');
+    const w = btn.dataset.w;
+    if (!w) return;
+    if (!apiKey) { alert('生成卡片需要先填写 API Key'); return; }
+    btn.dataset.state = 'busy';
+    btn.disabled = true;
+    btn.innerText = '生成中...';
+    try {
+        const isNew = await generateWordCard(w);
+        btn.innerText = isNew ? '已加入' : '已存在';
+        updateStatsUI();
+    } catch (e) {
+        btn.innerText = '加入卡片';
+        btn.disabled = false;
+        alert(e.message || '生成失败');
+    }
+    btn.dataset.state = '';
 }
 
 /* =========================================================
@@ -626,7 +804,7 @@ function clearBatch() {
     $('batchInput').focus();
 }
 
-function processBatch() {
+function processBatch(keepStatus) {
     if (batchRunning) { alert('正在生成中，请稍候'); return; }
     const text = $('batchInput').value.trim();
     if (!text) { alert('请先输入或粘贴单词'); return; }
@@ -635,7 +813,7 @@ function processBatch() {
     if (uniqueWords.length === 0) return;
 
     $('batchInput').value = '';
-    $('recognizeStatus').innerHTML = '';
+    if (keepStatus !== true) $('recognizeStatus').innerHTML = '';
 
     batchQueue = [...uniqueWords];
     batchRunning = true;
@@ -737,6 +915,10 @@ function renderCards() {
                     <div class="word-big">${esc(w.word)}</div>
                     ${w.phonetic ? `<div class="word-phonetic">${esc(w.phonetic)}</div>` : ''}
                     ${w.syllable ? `<div class="word-syllable">${esc(w.syllable)}</div>` : ''}
+                    <div class="pron-row">
+                        <button class="pron-btn" data-w="${esc(w.word)}" onclick="speak(this.dataset.w,2)">美音</button>
+                        <button class="pron-btn" data-w="${esc(w.word)}" onclick="speak(this.dataset.w,1)">英音</button>
+                    </div>
                 </div>
                 <button class="delete-btn" onclick="deleteWord(${w.id})">删除</button>
             </div>
@@ -907,10 +1089,14 @@ async function handleChecklistPhoto(event) {
     }
 }
 
-function showInfo(title, html) {
+function showInfo(title, html, word) {
     $('infoTitle').innerText = title;
     $('infoBody').innerHTML = html;
     $('infoModal').classList.add('active');
+    const sp = $('infoSpeak'), ad = $('infoAdd');
+    sp.style.display = ad.style.display = word ? '' : 'none';
+    sp.dataset.w = ad.dataset.w = word || '';
+    if (word && ad.dataset.state !== 'busy') { ad.innerText = '加入卡片'; ad.disabled = false; }
 }
 
 async function analyzeChecklist() {
@@ -944,6 +1130,7 @@ async function analyzeChecklist() {
 
 function closeInfoModal() {
     $('infoModal').classList.remove('active');
+    stopSpeak();
 }
 
 /* =========================================================
