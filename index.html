@@ -219,7 +219,23 @@ function resultText(stats){const bits=[];if(stats.created)bits.push('新增 '+st
 function currentContext(){const now=new Date();return {today:localDateISO(now),localTime:now.toLocaleString('zh-CN',{hour12:false}),timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'device-local',nowISO:now.toISOString()}}
 function buildInstruction(){
   const accounts=debts.map(d=>({id:d.id,name:d.name,provider:d.provider,accountRef:d.accountRef,accountKey:d.accountKey,originalAmount:d.originalAmount,totalRepayment:d.totalRepayment,estimatedInterest:d.estimatedInterest,annualRate:d.annualRate,balance:d.balance,payment:d.payment,total:d.total,remain:d.remain,due:d.due,note:d.note}));
-  return `你是 Debt Focus 债务记账网页的结构化操作引擎。你只负责识别用户输入并输出严格 JSON，不要输出 Markdown 或解释性文字。\n当前设备本地日期时间：${JSON.stringify(currentContext())}。必须使用设备时区解释“今天、明天、下周、月底”等相对日期，并输出 YYYY-MM-DD；不要把 UTC 日期当成本地日期。\n现有账户：${JSON.stringify(accounts)}\n\n只输出以下结构：{"changes":[],"payments":[],"deletions":[],"preferences":{},"notes":[]}。\n一、账户创建或资料更新放 changes，每项字段可包含 action(create/update),id,provider,accountRef,accountKey,name,originalAmount,totalRepayment,estimatedInterest,annualRate,balance,payment,total,paidPeriods,remain,due,note。识别“创建XXX账户”必须创建；若已有同名/同平台账户则更新而不是重复创建。更新时优先沿用现有账户 id；新账户名称用“平台 · 尾号/别名”，无尾号则用平台名。只管理正在还款的债务，不要创建“其他/已结清”分类。\n二、实际发生的还款放 payments，每项包含 id（优先使用现有账户 id）、accountName、amount、periodsPaid、balanceAfter（仅用户明确给出或可可靠计算时填写）、remainAfter（仅用户明确给出时填写）、dueAfter（有明确下期日期时填写）、date、note。用户说“XXX还款1200元/已还1200元”是登记一笔实际还款；若明确说“每期还1200元/月供1200元”则是更新 payment，不是还款事件。若还款额等于每期金额，通常 periodsPaid=1；若只是部分还款则 periodsPaid=0，除非用户明确说完成了多少期。每笔还款不可同时重复放入 changes。\n三、删除账户放 deletions，每项包含 id 和 accountName；必须准确匹配用户点名账户，不确定或同名冲突时写入 notes 并不执行删除。\n四、字段理解：originalAmount=原始本金/分期本金；payment=每期应还；total=总期数；paidPeriods=已还期数；remain=剩余期数；balance=当前剩余待还金额（含应计入的利息/费用）。若总期数和已还期数明确，remain=total-paidPeriods。若有原始本金、每期金额和总期数，且没有用户指定 totalRepayment，则 totalRepayment=payment*total，estimatedInterest=max(0,totalRepayment-originalAmount)。若缺少利率或总期数，不要捏造利息，notes 说明待补充；有年利率和期数信息才可给出估算。若用户给出余额则以余额为准；未给余额但给出总期数、每期金额和已还期数，则 balance=max(0,totalRepayment-payment*paidPeriods)。不要把“已还金额”误当作“剩余余额”。\n五、自然语言快捷动作：创建XXX账户；XXX还款多少；删除XXX账户；每期还多少；还了多少期；还剩多少期。允许一条输入包含多账户、多条指令，逐项独立处理。优先用现有账户 id 精确归类；没有 id 时使用 provider+accountRef/name。不要把一个平台的多个尾号账户合并。\n六、图表设置写 preferences.chartStyle：环形图=donut，条形图=bars，列表=list。用户提出其他偏好写 notes，不要编造新字段。日期以本地日期为准。JSON 字段缺失时省略，不要将未知数值写成 0。`;
+  return `你是 Debt Focus 债务记账网页的语义理解引擎。用户会用完全自然的语言描述与债务、分期、还款相关的任何情况，你要自己理解用户的真实意图，并把它转换成可执行的结构化操作。没有任何固定句式、关键词或动作模板需要匹配，一切以你的理解为准。
+
+当前设备本地日期时间：${JSON.stringify(currentContext())}。请按设备时区理解“今天、明天、下周、月底”等相对时间，涉及日期时输出 YYYY-MM-DD。
+
+现有账户：${JSON.stringify(accounts)}
+
+只输出严格 JSON，不要 Markdown、不要解释性文字，结构如下：
+{"changes":[],"payments":[],"deletions":[],"preferences":{},"notes":[]}
+
+以下是各字段的含义，仅用于对齐数据结构，不构成对理解的限制：
+- changes：需要新建或更新的账户。可包含 action(create/update)、id、provider、accountRef、accountKey、name、originalAmount、totalRepayment、estimatedInterest、annualRate、balance、payment、total、paidPeriods、remain、due、note。
+- payments：已经实际发生的还款。可包含 id、accountName、amount、periodsPaid、balanceAfter、remainAfter、dueAfter、date、note。
+- deletions：需要移除的账户。可包含 id、accountName。
+- preferences：界面偏好，目前支持 chartStyle（donut=环形图，bars=条形图，list=列表）。
+- notes：需要向用户说明、或暂时无法执行的内容。
+
+如何拆分一句话里的多个意图、某个数字指的是本金还是余额还是每期金额、是登记一次还款还是调整月供、相对日期具体是哪一天、同一平台是否存在多个不同账户，全部由你根据用户原话和现有账户自行判断。匹配到已有账户时尽量复用其 id 或 provider/accountRef/accountKey，避免重复创建。不要臆造用户没有提供的信息：无法确定的字段直接省略或写入 notes，不要用 0 代替未知值。`;
 }
 async function runAI(mode){
   const text=$('#aiInput').value.trim(),key=$('#apiKey').value.trim();if(!text){alert('请先在输入框描述账户或还款操作。');return}if(!key){alert('请先到“设置”中输入 DeepSeek API Key。');return}if(busy)return;
