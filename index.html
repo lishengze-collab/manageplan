@@ -1,269 +1,920 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#f6f6f7">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Debt Focus">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="manifest" href="manifest.webmanifest">
-<title>Debt Focus</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>单词记忆助手</title>
 <style>
-:root{--bg:#f4f4f5;--card:#fff;--ink:#101114;--muted:#777980;--line:#e5e5e8;--soft:#f1f1f3;--accent:#111;--red:#d93636;--green:#23865d;--radius:18px;--safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px)}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Microsoft YaHei",sans-serif}body{display:flex;justify-content:center;overscroll-behavior:none}.app{width:100%;max-width:430px;height:100dvh;min-height:100dvh;display:flex;flex-direction:column;background:var(--bg);padding-top:var(--safe-t);padding-bottom:calc(76px + var(--safe-b));overflow:hidden}main{flex:1;min-height:0;overflow:hidden}.page{display:none;height:100%;overflow-y:auto;overscroll-behavior:contain;padding:16px 14px 24px}.page.active{display:block}#inputPage.active{display:flex;flex-direction:column;overflow:hidden;padding-top:10px;padding-bottom:8px}.chat-compose{display:flex;flex:1;min-height:0;flex-direction:column;background:var(--card);border:1px solid #dedee2;border-radius:20px;padding:12px;box-shadow:0 1px 2px rgba(0,0,0,.02)}.textarea{display:block;flex:1;min-height:160px;width:100%;resize:none;border:0;border-radius:12px;background:#fff;padding:12px 10px;color:var(--ink);font-family:inherit;font-size:15px;line-height:1.75;outline:none}.textarea::placeholder{color:#9a9ba1;opacity:1}.textarea:focus{background:#fff}.bar{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:10px 0 0;flex-shrink:0}.btn{height:44px;border:0;border-radius:13px;padding:0 14px;font-size:14px;font-weight:750;cursor:pointer}.btn:disabled{opacity:.55;cursor:wait}.primary{background:#080808;color:#fff}.soft{background:#f0f1f3;color:#25262a}.result{display:none;flex-shrink:0;max-height:30%;overflow:auto;margin-top:10px;padding:11px 12px;border-radius:13px;background:#f7f7f8;border:1px solid var(--line);font-size:13px;line-height:1.65}.result.show{display:block}.result-title{font-size:13px;font-weight:800;margin-bottom:6px}.result-line{padding:7px 0;border-top:1px solid #e9e9eb}.result-line:first-of-type{border-top:0}.result-muted{color:var(--muted);font-size:12px}.nav{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:100%;max-width:430px;z-index:15;padding:9px 18px calc(9px + var(--safe-b));background:rgba(255,255,255,.94);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid #e7e7e9}.nav-inner{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:4px;background:#f1f1f3;border-radius:999px}.nav button{height:38px;border:0;border-radius:999px;background:transparent;color:#777980;font-size:13px;font-weight:700}.nav button.active{background:#fff;color:#111;box-shadow:0 1px 5px rgba(0,0,0,.08)}
-.overview-head{background:#111;color:#fff;border-radius:20px;padding:18px;margin-bottom:12px}.eyebrow{font-size:12px;color:rgba(255,255,255,.68)}.total-amount{font-size:32px;letter-spacing:-.8px;font-weight:850;margin:5px 0 15px;font-variant-numeric:tabular-nums}.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.metric{background:rgba(255,255,255,.1);padding:10px 11px;border-radius:13px;min-width:0}.metric span{display:block;font-size:11px;color:rgba(255,255,255,.68)}.metric b{display:block;font-size:16px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}.summary-card{padding:13px;background:#fff;border:1px solid var(--line);border-radius:15px}.summary-card span{font-size:11px;color:var(--muted)}.summary-card b{display:block;margin-top:5px;font-size:18px;font-variant-numeric:tabular-nums}.panel{background:#fff;border:1px solid var(--line);border-radius:17px;padding:14px;margin-bottom:12px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}.panel-head h2{font-size:15px;margin:0;font-weight:800}.panel-head span{font-size:11px;color:var(--muted)}.chart-wrap{display:grid;grid-template-columns:132px 1fr;gap:13px;align-items:center}.donut{width:132px;height:132px;border-radius:50%;display:grid;place-items:center;position:relative;background:#ededf0}.donut:after{content:"";position:absolute;width:78px;height:78px;border-radius:50%;background:#fff}.donut-center{position:relative;z-index:1;text-align:center}.donut-center b{display:block;font-size:19px}.donut-center span{font-size:10px;color:var(--muted)}.chart-legend{display:grid;gap:8px;max-height:142px;overflow:auto}.legend-row{display:grid;grid-template-columns:8px minmax(0,1fr) auto;align-items:center;gap:7px;font-size:11px}.legend-dot{width:8px;height:8px;border-radius:50%}.legend-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#48494e}.legend-pct{font-weight:800;font-variant-numeric:tabular-nums}.bar-chart{display:grid;gap:12px}.bar-item{display:grid;grid-template-columns:minmax(60px,1fr) 2fr 45px;align-items:center;gap:9px;font-size:12px}.bar-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bar-track,.progress{height:8px;background:#ededf0;border-radius:99px;overflow:hidden}.bar-track i,.progress i{display:block;height:100%;background:#171719;border-radius:99px}.bar-value{text-align:right;font-weight:750;font-variant-numeric:tabular-nums}.chart-list{display:grid;gap:0}.chart-list-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid #eee;font-size:12px}.chart-list-row:last-child{border-bottom:0}.chart-list-row span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.chart-list-row b{font-variant-numeric:tabular-nums}.account-list{display:grid;gap:9px}.account-card{border:1px solid var(--line);border-radius:15px;padding:13px;background:#fff}.account-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.account-name{font-size:15px;font-weight:800;line-height:1.35}.account-share{font-size:11px;color:var(--muted);white-space:nowrap}.account-balance{font-size:23px;font-weight:850;color:var(--red);margin:9px 0 4px;font-variant-numeric:tabular-nums}.account-meta{font-size:11px;color:var(--muted);line-height:1.65}.account-progress{margin-top:10px}.progress{height:7px}.progress i{background:#d93636}.progress-caption{display:flex;justify-content:space-between;margin-top:5px;font-size:10px;color:var(--muted)}.account-card-foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:9px;border-top:1px solid #f0f0f1}.account-card-foot span{font-size:11px;color:var(--muted)}.detail-link{border:0;background:#f0f0f2;padding:7px 11px;border-radius:999px;font-size:11px;font-weight:750;color:#222}.empty{padding:24px 12px;text-align:center;color:var(--muted);background:#fff;border:1px dashed #d8d8dc;border-radius:14px;font-size:12px}.notice{display:none;padding:11px 13px;background:#fff4e8;color:#9b5a12;border-radius:13px;font-size:12px;margin-bottom:12px}.settings-card{padding:15px;background:#fff;border:1px solid var(--line);border-radius:17px;margin-bottom:12px}.settings-card h2{font-size:15px;margin:0 0 5px}.settings-card p{font-size:12px;color:var(--muted);line-height:1.6;margin:0 0 11px}.field{margin-top:11px}.field label{display:block;font-size:12px;font-weight:700;color:#55565c;margin-bottom:6px}.field input{width:100%;height:43px;border:1px solid #dedee2;border-radius:12px;padding:0 12px;font-family:inherit;font-size:14px;background:#fafafa;color:#111;outline:none}.field input:focus{border-color:#777;background:#fff}.switch{display:flex;align-items:center;gap:8px;font-size:12px;color:#555;margin-top:11px}.switch input{width:16px;height:16px;accent-color:#111}.settings-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.storage-status{font-size:12px;color:var(--green);margin-top:10px;line-height:1.5}.hint{font-size:11px;color:var(--muted);line-height:1.6;margin-top:10px}.overlay{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.4);display:none;align-items:flex-end;justify-content:center}.overlay.show{display:flex}.sheet{width:100%;max-width:430px;max-height:88dvh;overflow:auto;background:#fff;border-radius:22px 22px 0 0;padding:18px 16px calc(20px + var(--safe-b))}.sheet-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}.sheet-head h2{font-size:17px;margin:0}.close{width:31px;height:31px;border:0;border-radius:50%;background:#f0f0f2;font-size:20px}.detail-kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px}.detail-kpi{background:#f4f4f5;border-radius:12px;padding:10px;font-size:11px;color:var(--muted)}.detail-kpi b{display:block;font-size:15px;color:#111;margin-top:4px}.detail-progress{height:8px;background:#eee;border-radius:99px;overflow:hidden;margin:14px 0 6px}.detail-progress i{display:block;height:100%;background:#d93636}.schedule{margin-top:14px;border-top:1px solid #eee}.schedule-row{display:grid;grid-template-columns:62px 1fr 1fr;gap:7px;padding:10px 1px;border-bottom:1px solid #eee;font-size:11px}.schedule-row span:nth-child(2),.schedule-row span:nth-child(3){text-align:right}.schedule-head{font-weight:800;color:var(--muted)}.paid-row{color:#999}.payment-log{margin-top:14px}.log-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;font-size:12px}.hide{display:none!important}
-@media(max-width:360px){.page{padding-left:11px;padding-right:11px}.chart-wrap{grid-template-columns:112px 1fr;gap:10px}.donut{width:112px;height:112px}.donut:after{width:66px;height:66px}.total-amount{font-size:28px}.account-balance{font-size:21px}.bar-item{grid-template-columns:minmax(48px,1fr) 1.5fr 40px;gap:6px}}
-@media(min-width:600px){body{background:#e9eaed}.app{box-shadow:0 0 40px rgba(0,0,0,.08)}}
+:root{
+  --primary:#2c5e4f;
+  --primary-light:#f0f5f3;
+  --bg-color:#fafafa;
+  --text-main:#222222;
+  --text-muted:#999999;
+  --white:#ffffff;
+  --red:#d93b3b;
+  --radius:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;
+  background-color:var(--bg-color);color:var(--text-main);
+  display:flex;justify-content:center;height:100vh;overflow:hidden;
+}
+#app{
+  width:100%;max-width:480px;background-color:var(--white);
+  position:relative;height:100%;display:flex;flex-direction:column;
+}
+.header{
+  padding:20px 20px 10px;font-size:22px;font-weight:600;
+  color:var(--primary);text-align:center;letter-spacing:1px;
+}
+.content{flex:1;overflow-y:auto;padding:0 20px 100px 20px;display:none;}
+.content.active{display:block;}
+
+/* ============ 搜索框 ============ */
+.search-container{position:relative;display:flex;align-items:center;margin-bottom:16px;}
+.search-box{
+  width:100%;padding:14px 45px 14px 45px;border-radius:30px;border:none;
+  background-color:var(--bg-color);font-size:15px;outline:none;transition:background .2s;
+}
+.search-box:focus{background-color:#eee;}
+.icon-search,.icon-add{
+  position:absolute;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--text-muted);height:100%;width:45px;
+}
+.icon-search{right:0;color:var(--primary);}
+.icon-add{left:0;}
+
+/* ============ 粘贴区（固定大小，不允许拖大） ============ */
+.paste-box{
+  width:100%;
+  height:120px; /* 固定高度 */
+  padding:14px;
+  border-radius:14px;
+  border:1px dashed #d5e0db;
+  background:var(--primary-light);
+  font-size:14px;
+  line-height:1.6;
+  resize:none; /* 禁止拖拽调整大小 */
+  overflow-y:auto; /* 内容超出时内部滚动 */
+  outline:none;
+  font-family:inherit;
+  color:var(--text-main);
+}
+.paste-box::placeholder{color:#a8b5af;}
+.btn-row{display:flex;gap:10px;margin-top:12px;}
+.btn-primary{
+  flex:1;padding:14px;background:var(--primary);color:#fff;border:none;
+  border-radius:12px;font-size:16px;font-weight:500;cursor:pointer;
+}
+.btn-primary:disabled{opacity:.5;}
+.btn-outline{
+  padding:14px 20px;background:var(--white);color:var(--primary);
+  border:1px solid var(--primary);border-radius:12px;font-size:15px;cursor:pointer;
+}
+.section-label{
+  font-size:12px;color:var(--text-muted);letter-spacing:1px;
+  margin:24px 0 10px;font-weight:600;
+}
+
+/* ============ 识别状态 ============ */
+.empty-hint{font-size:13px;color:#bbb;text-align:center;padding:24px 0;}
+.status-item{
+  display:flex;align-items:center;gap:10px;padding:11px 14px;
+  font-size:13px;background:var(--bg-color);border-radius:12px;margin-bottom:8px;
+  animation:fadeIn .3s ease;
+}
+.status-item .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:#ccc;}
+.status-item .dot.loading{background:var(--primary);animation:pulse 1s infinite;}
+.status-item .dot.done{background:#3aab6d;}
+.status-item .dot.fail{background:#e05555;}
+.status-item .st-word{font-weight:600;color:var(--text-main);}
+.status-item .st-msg{margin-left:auto;color:var(--text-muted);font-size:12px;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:translateY(0);}}
+
+/* ============ 设置与统计区 ============ */
+.settings-wrapper{margin-top:32px;border-top:1px solid #f0f0f0;padding-top:20px;}
+.stats-box{background:var(--bg-color);padding:20px;border-radius:var(--radius);margin-bottom:16px;}
+.stats-row{display:flex;justify-content:space-between;margin-bottom:12px;font-size:14px;}
+.stats-row:last-child{margin-bottom:0;}
+.stats-val{font-weight:600;color:var(--primary);}
+.setting-item{margin-bottom:16px;}
+.setting-item label{display:block;font-size:13px;margin-bottom:8px;color:var(--text-muted);}
+.setting-item input{
+  width:100%;padding:14px;border:1px solid #eee;background:var(--bg-color);
+  border-radius:12px;font-size:15px;outline:none;
+}
+
+/* ============ 单词卡片 ============ */
+.flashcard-container{
+  display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:15px;
+  padding:10px 0;height:calc(100vh - 160px);
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+}
+.flashcard-container::-webkit-scrollbar{display:none;}
+.flashcard{
+  flex:0 0 88%;scroll-snap-align:center;background:var(--bg-color);
+  border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;
+  position:relative;
+}
+.card-header{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #eee;
+}
+.word-big{
+  font-size:34px;font-weight:700;color:var(--red);
+  letter-spacing:.5px;line-height:1.15;word-break:break-word;
+}
+.word-phonetic{font-size:14px;color:#777;margin-top:6px;}
+.word-syllable{
+  font-size:13px;color:var(--primary);margin-top:3px;
+  letter-spacing:1.5px;font-weight:500;
+}
+.delete-btn{
+  color:#ff4d4f;font-size:13px;background:none;border:none;
+  cursor:pointer;flex-shrink:0;padding-left:8px;
+}
+.card-body{flex:1;overflow-y:auto;font-size:14px;line-height:1.65;color:#444;}
+.sec{margin-bottom:14px;}
+.sec:last-child{margin-bottom:0;}
+.sec-label{
+  font-size:11px;color:var(--primary);font-weight:700;letter-spacing:1px;
+  margin-bottom:5px;
+}
+.sec-body{font-size:14px;line-height:1.65;color:#333;white-space:pre-line;}
+.sec-body.en{font-family:Georgia,"Times New Roman",serif;color:#3a3a3a;}
+.card-footer{
+  margin-top:14px;padding-top:14px;border-top:1px solid #eee;
+  font-size:12px;color:var(--text-muted);text-align:center;
+}
+.empty-state{
+  width:100%;text-align:center;color:var(--text-muted);
+  margin-top:100px;font-size:14px;
+}
+
+/* ============ 清单 ============ */
+.clock-card{
+  background:linear-gradient(135deg,#2c5e4f,#3d7a66);color:#fff;
+  border-radius:var(--radius);padding:20px;margin-bottom:18px;
+  box-shadow:0 6px 20px rgba(44,94,79,.18);
+}
+.clock-time{font-size:38px;font-weight:700;letter-spacing:2px;font-variant-numeric:tabular-nums;}
+.clock-date{font-size:13px;opacity:.85;margin-top:4px;}
+.clock-log{font-size:12px;opacity:.9;margin-top:12px;line-height:1.7;}
+.clock-actions{display:flex;gap:10px;margin-top:14px;}
+.clock-actions button{
+  flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.4);
+  background:rgba(255,255,255,.14);color:#fff;font-size:14px;cursor:pointer;
+}
+.clock-actions button:active{background:rgba(255,255,255,.28);}
+
+.check-item{
+  display:flex;align-items:flex-start;gap:12px;padding:14px;
+  background:var(--bg-color);border-radius:14px;margin-bottom:10px;
+  animation:fadeIn .25s ease;
+}
+.check-box{
+  width:24px;height:24px;border-radius:50%;border:2px solid #ccd6d1;
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  margin-top:1px;cursor:pointer;transition:all .2s;
+}
+.check-box.done{background:var(--primary);border-color:var(--primary);color:#fff;}
+.check-box svg{opacity:0;transition:opacity .2s;}
+.check-box.done svg{opacity:1;}
+.check-main{flex:1;min-width:0;}
+.check-text{font-size:15px;line-height:1.5;color:var(--text-main);word-break:break-word;}
+.check-text.done{color:#b3b3b3;text-decoration:line-through;}
+.check-photo{
+  width:58px;height:58px;object-fit:cover;border-radius:9px;
+  margin-top:8px;display:block;border:1px solid #eee;
+}
+.check-meta{font-size:11px;color:#bbb;margin-top:4px;}
+
+.add-check-row{display:flex;gap:10px;margin-bottom:16px;}
+.add-check-row input{
+  flex:1;padding:14px;border:1px solid #eee;background:var(--bg-color);
+  border-radius:12px;font-size:15px;outline:none;
+}
+.add-check-row button{
+  padding:0 20px;border-radius:12px;border:none;background:var(--primary);
+  color:#fff;font-size:15px;cursor:pointer;
+}
+.check-toolbar{display:flex;gap:10px;margin-bottom:18px;}
+.check-toolbar button{
+  flex:1;padding:12px;border-radius:12px;font-size:14px;cursor:pointer;
+  background:var(--white);color:var(--primary);border:1px solid var(--primary);
+}
+.check-toolbar button.ghost{color:#888;border-color:#ddd;}
+
+/* ============ 底部导航 ============ */
+.bottom-nav{
+  position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
+  width:84%;height:56px;background:rgba(255,255,255,.92);
+  backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);
+  border-radius:28px;box-shadow:0 4px 20px rgba(0,0,0,.06);
+  display:flex;justify-content:space-around;align-items:center;
+  border:1px solid rgba(0,0,0,.03);z-index:20;
+}
+.nav-item{
+  color:var(--text-muted);font-size:15px;flex:1;text-align:center;
+  height:100%;line-height:56px;cursor:pointer;transition:color .2s;
+}
+.nav-item.active{color:var(--primary);font-weight:600;}
+
+/* ============ 弹窗 ============ */
+.modal{
+  display:none;position:absolute;top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,.4);z-index:100;align-items:center;
+  justify-content:center;padding:20px;
+}
+.modal.active{display:flex;}
+.modal-content{
+  background:#fff;width:100%;max-height:85vh;border-radius:var(--radius);
+  padding:24px;display:flex;flex-direction:column;animation:scaleIn .25s ease;
+}
+@keyframes scaleIn{from{opacity:0;transform:scale(.95);}to{opacity:1;transform:scale(1);}}
+.modal-header{
+  display:flex;justify-content:space-between;align-items:center;
+  font-weight:600;font-size:18px;color:var(--primary);margin-bottom:15px;
+}
+.modal-body{
+  flex:1;overflow-y:auto;font-size:15px;line-height:1.65;color:#333;
+  margin-bottom:18px;
+}
+.modal-footer{display:flex;gap:10px;}
+.modal-footer .btn-primary{flex:1;}
+.modal-footer .btn-outline{flex:1;}
 </style>
 </head>
 <body>
-<div class="app">
-<main>
-<section class="page active" id="inputPage" aria-label="AI录入">
-  <div class="chat-compose">
-    <textarea class="textarea" id="aiInput" placeholder="直接描述你的操作，例如：\n创建招商银行账户，分期总额 12000 元，每期 1200 元，共 12 期，已还 3 期，下期 11 月 15 日。\n招商银行还款 1200 元。\n删除招商银行账户。\n也可以说：把总览图表切换成条形图。" autocomplete="off" spellcheck="false"></textarea>
-    <div class="result" id="aiResult" aria-live="polite"></div>
-    <div class="bar">
-      <button class="btn soft" id="previewBtn">预览</button>
-      <button class="btn primary" id="recordBtn">录入</button>
+
+<div id="app">
+  <div class="header" id="header-title">单词助手</div>
+
+  <!-- ================= TAB 1 录入 ================= -->
+  <div class="content active" id="tab-input">
+    <div class="search-container">
+      <!-- 左侧：相机/图片 -->
+      <div class="icon-add" onclick="document.getElementById('imageInput').click()">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+          <circle cx="12" cy="13" r="4"></circle>
+        </svg>
+      </div>
+      <input type="text" class="search-box" id="searchInput" placeholder="输入单词，回车生成卡片...">
+      <!-- 右侧：搜索 -->
+      <div class="icon-search" onclick="triggerSearch()">
+        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
+          <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </div>
+    </div>
+
+    <textarea class="paste-box" id="batchInput"
+      placeholder="批量粘贴单词，一行一个或用逗号分隔，AI 自动识别生成卡片…&#10;例如：&#10;abandon, ambitious, cognitive&#10;deteriorate"></textarea>
+
+    <div class="btn-row">
+      <button class="btn-outline" onclick="clearBatch()">清空</button>
+      <button class="btn-primary" id="batchBtn" onclick="processBatch()">AI 识别生成卡片</button>
+    </div>
+
+    <div class="section-label">识别结果</div>
+    <div id="recognizeStatus"><div class="empty-hint">暂无识别任务</div></div>
+
+    <!-- 设置与统计 -->
+    <div class="settings-wrapper">
+      <div class="section-label" style="margin-top:0;">设置与统计</div>
+      <div class="stats-box">
+        <div class="stats-row"><span>API 调用次数</span><span class="stats-val" id="stat-api-calls">0</span></div>
+        <div class="stats-row"><span>估算 TOKEN 量</span><span class="stats-val" id="stat-tokens">0</span></div>
+        <div class="stats-row"><span>单词总数</span><span class="stats-val" id="stat-words">0</span></div>
+        <div class="stats-row"><span>清单事项数</span><span class="stats-val" id="stat-checks">0</span></div>
+      </div>
+      
+      <div class="setting-item">
+        <label>DeepSeek API Key（仅本地存储）</label>
+        <input type="password" id="apiKeyInput" placeholder="sk-...">
+      </div>
+      <button class="btn-primary" onclick="saveApiKey()" style="width:100%; margin-bottom:12px;">保存 API Key</button>
+      
+      <div style="display:flex; gap:10px;">
+        <button class="btn-outline" style="flex:1;" onclick="exportData()">导出备份</button>
+        <button class="btn-outline" style="flex:1; border-color:#ddd; color:#666;" onclick="document.getElementById('importFile').click()">导入恢复</button>
+      </div>
     </div>
   </div>
-</section>
-<section class="page" id="homePage" aria-label="总览">
-  <div class="overview-head">
-    <div class="eyebrow">当前待还总额</div>
-    <div class="total-amount" id="totalBalance">¥0.00</div>
-    <div class="metric-grid">
-      <div class="metric"><span>未来 30 天预计还款</span><b id="monthDue">¥0.00</b></div>
-      <div class="metric"><span>最近还款日</span><b id="nextDue">暂无</b></div>
+
+  <!-- ================= TAB 2 卡片 ================= -->
+  <div class="content" id="tab-cards" style="padding:0 10px 100px 10px;">
+    <div class="flashcard-container" id="cardsContainer"></div>
+  </div>
+
+  <!-- ================= TAB 3 清单 ================= -->
+  <div class="content" id="tab-checklist">
+    <div class="clock-card">
+      <div class="clock-time" id="live-clock">--:--:--</div>
+      <div class="clock-date" id="live-date">--</div>
+      <div class="clock-log" id="clock-log">今日暂无出入记录</div>
+      <div class="clock-actions">
+        <button onclick="recordOut()">🚪 记录出门</button>
+        <button onclick="recordHome()">🏠 记录回家</button>
+      </div>
+    </div>
+
+    <div class="add-check-row">
+      <input type="text" id="checkInput" placeholder="添加清单事项，如：带钥匙 / 做 20 个单词…"
+        onkeypress="if(event.key==='Enter')addCheckItem()">
+      <button onclick="addCheckItem()">添加</button>
+    </div>
+
+    <div class="check-toolbar">
+      <button onclick="resetChecklist()">一键循环刷新</button>
+      <button class="ghost" onclick="analyzeChecklist()">AI 分析</button>
+    </div>
+
+    <div id="checklistContainer"></div>
+  </div>
+
+  <!-- 底部导航 -->
+  <div class="bottom-nav">
+    <div class="nav-item active" onclick="switchTab('input')">录入</div>
+    <div class="nav-item" onclick="switchTab('cards')">卡片</div>
+    <div class="nav-item" onclick="switchTab('checklist')">清单</div>
+  </div>
+
+  <!-- 隐藏的文件输入 -->
+  <input type="file" id="imageInput" accept="image/*" capture="environment"
+    style="display:none;" onchange="handleImageUpload(event)">
+  <input type="file" id="checklistCamera" accept="image/*" capture="environment"
+    style="display:none;" onchange="handleChecklistPhoto(event)">
+  <input type="file" id="importFile" style="display:none;" accept=".json" onchange="importData(event)">
+
+  <!-- 拍照询问弹窗 -->
+  <div class="modal" id="photoModal">
+    <div class="modal-content" style="max-height:none;">
+      <div class="modal-header"><span>拍照记录</span></div>
+      <div class="modal-body" id="photoModalBody">是否拍照记录完成情况？</div>
+      <div class="modal-footer">
+        <button class="btn-outline" onclick="closePhotoModal()">跳过</button>
+        <button class="btn-primary" onclick="takeChecklistPhoto()">📷 拍照</button>
+      </div>
     </div>
   </div>
-  <div class="summary-grid">
-    <div class="summary-card"><span>还款中账户</span><b id="activeCount">0 笔</b></div>
-    <div class="summary-card"><span>剩余预估利息</span><b id="interestTotal">¥0.00</b></div>
-    <div class="summary-card"><span>累计已还金额</span><b id="paidTotal">¥0.00</b></div>
-    <div class="summary-card"><span>已完成 / 总期数</span><b id="termTotal">0 / 0 期</b></div>
+
+  <!-- 信息弹窗（AI 分析等） -->
+  <div class="modal" id="infoModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span id="infoTitle">分析</span>
+        <span onclick="closeInfoModal()" style="color:#ccc;font-size:24px;line-height:1;cursor:pointer;">×</span>
+      </div>
+      <div class="modal-body" id="infoBody"></div>
+      <div class="modal-footer">
+        <button class="btn-primary" onclick="closeInfoModal()">知道了</button>
+      </div>
+    </div>
   </div>
-  <div class="notice" id="dueNotice"></div>
-  <section class="panel">
-    <div class="panel-head"><h2>账户金额占比</h2><span id="chartCaption">环形图</span></div>
-    <div id="shareChart"></div>
-  </section>
-  <section class="panel">
-    <div class="panel-head"><h2>还款中账户</h2><span id="accountCount">按待还金额排序</span></div>
-    <div class="account-list" id="accountList"></div>
-  </section>
-</section>
-<section class="page" id="settingsPage" aria-label="设置">
-  <div class="settings-card">
-    <h2>DeepSeek API</h2>
-    <p>账户创建、还款、删除、金额和期数更新，以及图表样式调整，均通过输入页的 AI 文本处理。</p>
-    <div class="field"><label for="apiEndpoint">API 地址</label><input id="apiEndpoint" value="https://api.deepseek.com/chat/completions" autocomplete="url"></div>
-    <div class="field"><label for="apiModel">模型</label><input id="apiModel" value="deepseek-chat" autocomplete="off"></div>
-    <div class="field"><label for="apiKey">API Key</label><input id="apiKey" type="password" placeholder="输入 DeepSeek API Key" autocomplete="off"></div>
-    <label class="switch"><input id="rememberKey" type="checkbox"> 将 API Key 保存在本机</label>
-    <div class="hint">默认只保留在当前标签页。仅在个人可信设备上启用本机保存。不要把 API Key 写进公开 HTML 或提交到代码仓库。</div>
-  </div>
-  <div class="settings-card">
-    <h2>本地数据与备份</h2>
-    <p>数据同时写入两份 localStorage 镜像，并额外写入 IndexedDB；页面切到后台或关闭前会再次同步本地镜像。</p>
-    <div class="settings-actions"><button class="btn soft" id="exportBtn">导出备份</button><button class="btn soft" id="importBtn">导入备份</button></div>
-    <input id="importFile" type="file" accept="application/json" class="hide">
-    <div class="storage-status" id="storageStatus">正在检查本地保存状态…</div>
-    <div class="hint">iOS 17 Safari 普通刷新可从本地存储恢复；清理网站数据、无痕浏览或更换设备仍可能导致数据丢失，重要数据请定期导出 JSON。</div>
-  </div>
-</section>
-</main>
-<nav class="nav" aria-label="主导航"><div class="nav-inner">
-  <button class="active" data-page="inputPage">输入</button>
-  <button data-page="homePage">总览</button>
-  <button data-page="settingsPage">设置</button>
-</div></nav>
 </div>
-<div class="overlay" id="detailOverlay"><div class="sheet"><div class="sheet-head"><h2 id="detailTitle">账户明细</h2><button class="close" id="detailClose" aria-label="关闭">×</button></div><div id="detailBody"></div></div></div>
+
 <script>
-(function(){
-'use strict';
-const KEY='debt_focus_v2',BACKUP_KEY='debt_focus_v2_backup',OLD='debt_manager_v1',CFG='debt_focus_cfg',DB_NAME='debt_focus_local_v1',DB_STORE='snapshots',DB_KEY='latest',SCHEMA=4;
-const $=s=>document.querySelector(s),$$=s=>Array.from(document.querySelectorAll(s));
-const money=n=>'¥'+(Number(n)||0).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
-const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
-const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let debts=[],chartStyle='donut',busy=false;
+/* =========================================================
+   基础工具
+========================================================= */
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g,
+  c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nowStr = () => new Date().toLocaleString('zh-CN',
+  {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'});
+const THREE_DAYS = 3 * 24 * 60 * 60 * 1000;
 
-function localDateISO(date){const d=date||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
-function parseLocalDate(value){const m=String(value||'').match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);return m?new Date(Number(m[1]),Number(m[2])-1,Number(m[3]),12,0,0):null}
-function addMonths(dateStr,n){const d=parseLocalDate(dateStr)||new Date();const day=d.getDate();const y=d.getFullYear(),m=d.getMonth()+Number(n);const first=new Date(y,m,1,12);const last=new Date(first.getFullYear(),first.getMonth()+1,0,12).getDate();first.setDate(Math.min(day,last));return localDateISO(first)}
-function daysUntil(dateStr){const due=parseLocalDate(dateStr),today=parseLocalDate(localDateISO());return due?Math.round((due-today)/86400000):99999}
-function fmtDate(s){const d=parseLocalDate(s);return d?d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'):'未设置'}
-function normText(v){return String(v||'').toLowerCase().replace(/分期|借款|账户|账号|白条|金融|消费金融|app|[\s\-_（）()]/g,'')}
-function makeKey(provider,ref){const p=normText(provider),raw=String(ref||'').trim().toLowerCase(),r=raw?( /\d/.test(raw)?raw.replace(/\D/g,'').slice(-8):normText(raw) ):'';return p?(p+(r?':'+r:'')):''}
-function normalize(d){
-  d=d||{};const balance=Math.max(0,Number(d.balance!=null?d.balance:(d.repayBalance!=null?d.repayBalance:d.amount))||0);
-  const total=Math.max(0,parseInt(d.total!=null?d.total:(d.repayTotalPeriods||d.totalPeriods),10)||0);
-  const remainRaw=d.remain!=null?d.remain:(d.repayRemainPeriods!=null?d.repayRemainPeriods:(d.totalPeriods!=null?Number(d.totalPeriods)-Number(d.paidPeriods||0):total));
-  return {id:String(d.id||uid()),name:String(d.name||d.provider||'未命名账户'),provider:String(d.provider||d.name||''),accountRef:String(d.accountRef||''),accountKey:String(d.accountKey||makeKey(d.provider||d.name,d.accountRef)),originalAmount:Math.max(0,Number(d.originalAmount!=null?d.originalAmount:(d.amount!=null?d.amount:0))||0),totalRepayment:Math.max(0,Number(d.totalRepayment)||0),estimatedInterest:d.estimatedInterest!=null?Math.max(0,Number(d.estimatedInterest)||0):(d.totalInterest!=null?Math.max(0,Number(d.totalInterest)||0):null),annualRate:Math.max(0,Number(d.annualRate!=null?d.annualRate:d.interestRate)||0),paymentHistory:Array.isArray(d.paymentHistory)?d.paymentHistory:[],type:'normal',balance,payment:Math.max(0,Number(d.payment!=null?d.payment:(d.repayPeriodAmount||d.periodAmount))||0),due:String(d.due||(d.repayDueDate||d.nextDueDate)||''),total,remain:Math.max(0,parseInt(remainRaw,10)||0),note:String(d.note||d.remark||''),updatedAt:d.updatedAt||new Date().toISOString()};
-}
-function snapshot(){return JSON.stringify({schema:SCHEMA,savedAt:new Date().toISOString(),debts})}
-function parseSnapshot(raw){if(!raw)return null;try{const v=JSON.parse(raw);if(Array.isArray(v))return {savedAt:'2000-01-01T00:00:00.000Z',debts:v};if(v&&Array.isArray(v.debts))return {savedAt:v.savedAt||v.exportedAt||'2000-01-01T00:00:00.000Z',debts:v.debts};}catch(e){}return null}
-function readLocalSnapshot(){let candidates=[];try{const x=parseSnapshot(localStorage.getItem(KEY));if(x)candidates.push(x)}catch(e){}try{const x=parseSnapshot(localStorage.getItem(BACKUP_KEY));if(x)candidates.push(x)}catch(e){}if(!candidates.length){try{const x=parseSnapshot(localStorage.getItem(OLD));if(x)candidates.push(x)}catch(e){}}return candidates.sort((a,b)=>String(b.savedAt).localeCompare(String(a.savedAt)))[0]||null}
-function writeLocalMirrors(raw){let ok=0,errors=[];const expected=parseSnapshot(raw);[KEY,BACKUP_KEY].forEach(k=>{try{localStorage.setItem(k,raw);const v=parseSnapshot(localStorage.getItem(k));if(v&&expected&&v.savedAt===expected.savedAt&&JSON.stringify(v.debts)===JSON.stringify(expected.debts))ok++}catch(e){errors.push(e)}});if(!ok)throw new Error('浏览器本地存储不可用');return {ok,errors}}
-function openDB(){return new Promise((resolve,reject)=>{if(!('indexedDB' in window))return reject(new Error('IndexedDB 不可用'));let req;try{req=indexedDB.open(DB_NAME,1)}catch(e){return reject(e)}req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains(DB_STORE))db.createObjectStore(DB_STORE)};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error||new Error('IndexedDB 打开失败'))})}
-async function readIDBSnapshot(){const db=await openDB();return new Promise((resolve,reject)=>{const tx=db.transaction(DB_STORE,'readonly'),req=tx.objectStore(DB_STORE).get(DB_KEY);req.onsuccess=()=>{db.close();resolve(parseSnapshot(req.result))};req.onerror=()=>{db.close();reject(req.error)}})}
-async function writeIDBSnapshot(raw){const db=await openDB();return new Promise((resolve,reject)=>{const tx=db.transaction(DB_STORE,'readwrite');tx.objectStore(DB_STORE).put(raw,DB_KEY);tx.oncomplete=()=>{db.close();resolve(true)};tx.onerror=tx.onabort=()=>{const e=tx.error||new Error('IndexedDB 保存失败');db.close();reject(e)}})}
-function setStorageStatus(msg,isError){const el=$('#storageStatus');if(el){el.textContent=msg;el.style.color=isError?'#c43a3a':'#23865d'}}
-function persist(){
-  const raw=snapshot();let mirror={ok:0,errors:[]};
-  try{mirror=writeLocalMirrors(raw);setStorageStatus(mirror.ok===2?'双份本地镜像已保存，正在同步 IndexedDB…':'部分本地镜像已保存，建议导出备份',mirror.ok!==2)}catch(e){setStorageStatus('本地保存失败：'+e.message+'。请立即导出备份。',true);alert('本地保存失败：'+e.message+'。请立即导出 JSON 备份。')}
-  writeIDBSnapshot(raw).then(()=>setStorageStatus(mirror.ok===2?'已完成双份 localStorage + IndexedDB 保存':'IndexedDB 已保存；请检查浏览器本地存储权限',mirror.ok!==2)).catch(()=>setStorageStatus(mirror.ok?'双份镜像已保存；IndexedDB 不可用':'保存能力受限，请导出备份',true));
-  renderOverview();
-}
-function metrics(d){
-  const total=Math.max(0,Number(d.total)||0),remain=Math.max(0,Number(d.remain)||0),paid=Math.max(0,total-remain);
-  const original=Math.max(0,Number(d.originalAmount)||0),payment=Math.max(0,Number(d.payment)||0);
-  const totalRepayment=Math.max(0,Number(d.totalRepayment)||(payment&&total?payment*total:original));
-  const interestKnown=d.estimatedInterest!=null||(original>0&&totalRepayment>0&&(Math.abs(totalRepayment-original)>0.01||(payment>0&&total>0)));
-  const interest=d.estimatedInterest!=null?Math.max(0,Number(d.estimatedInterest)||0):(original>0?Math.max(0,totalRepayment-original):0);
-  const balance=Math.max(0,Number(d.balance)||0);
-  const pct=total?Math.min(100,Math.max(0,paid/total*100)):(totalRepayment?Math.min(100,Math.max(0,(totalRepayment-balance)/totalRepayment*100)):0);
-  const historyPaid=(d.paymentHistory||[]).reduce((s,x)=>s+Math.max(0,Number(x.amount)||0),0);
-  const paidAmount=Math.max(historyPaid,Math.max(0,totalRepayment-balance));
-  const remainingInterest=total?interest*Math.min(1,remain/total):interest;
-  return {total,remain,paid,original,payment,totalRepayment,interest,interestKnown,balance,pct,paidAmount,remainingInterest};
-}
-function payoffDate(d){if(d.balance<=0)return '已结清';if(!d.due||!d.remain)return '待补充期数/日期';return addMonths(d.due,d.remain-1)}
-function activeAccounts(){return debts.filter(d=>Number(d.balance)>0).sort((a,b)=>{if(a.due&&b.due)return a.due.localeCompare(b.due)||b.balance-a.balance;if(a.due)return -1;if(b.due)return 1;return b.balance-a.balance})}
-const chartColors=['#111111','#d93636','#777980','#b5b6bb','#55565c','#d17d48','#9a8abf','#4e8790','#c18caa','#9a9a9a'];
-function renderChart(accounts,total){
-  const host=$('#shareChart');$('#chartCaption').textContent=chartStyle==='donut'?'环形图':chartStyle==='bars'?'条形图':'明细列表';
-  if(!total){host.innerHTML='<div class="empty">录入还款中账户后显示金额占比</div>';return}
-  const list=accounts.slice().sort((a,b)=>b.balance-a.balance),sum=total;
-  if(chartStyle==='bars'){
-    host.innerHTML='<div class="bar-chart">'+list.map((d,i)=>{const pct=d.balance/sum*100;return `<div class="bar-item"><span class="bar-name">${esc(d.name)}</span><div class="bar-track"><i style="width:${pct.toFixed(2)}%;background:${chartColors[i%chartColors.length]}"></i></div><b class="bar-value">${pct.toFixed(1)}%</b></div>`}).join('')+'</div>';return;
-  }
-  if(chartStyle==='list'){
-    host.innerHTML='<div class="chart-list">'+list.map((d,i)=>{const pct=d.balance/sum*100;return `<div class="chart-list-row"><span>${esc(d.name)}</span><b>${money(d.balance)}</b><b>${pct.toFixed(1)}%</b></div>`}).join('')+'</div>';return;
-  }
-  let cursor=0;const stops=list.map((d,i)=>{const end=cursor+d.balance/sum*100;const seg=`${chartColors[i%chartColors.length]} ${cursor}% ${end}%`;cursor=end;return seg});
-  host.innerHTML=`<div class="chart-wrap"><div class="donut" style="background:conic-gradient(${stops.join(',')})"><div class="donut-center"><b>${list.length}</b><span>个账户</span></div></div><div class="chart-legend">${list.map((d,i)=>`<div class="legend-row"><i class="legend-dot" style="background:${chartColors[i%chartColors.length]}"></i><span class="legend-name">${esc(d.name)}</span><b class="legend-pct">${(d.balance/sum*100).toFixed(1)}%</b></div>`).join('')}</div></div>`;
-}
-function accountCard(d,total){const m=metrics(d),share=total?d.balance/total*100:0;return `<article class="account-card"><div class="account-top"><div class="account-name">${esc(d.name)}</div><span class="account-share">占比 ${share.toFixed(1)}%</span></div><div class="account-balance">${money(d.balance)}</div><div class="account-meta">每期 ${d.payment?money(d.payment):'待补充'} · 已还 ${m.paid} / ${m.total||'—'} 期 · 剩余 ${m.remain} 期</div><div class="account-meta">下期 ${d.due?fmtDate(d.due):'待设置'} · 预计结清 ${payoffDate(d)}</div><div class="account-progress"><div class="progress"><i style="width:${m.pct.toFixed(2)}%"></i></div><div class="progress-caption"><span>还款进度 ${m.pct.toFixed(1)}%</span><span>估算剩余利息 ${m.interestKnown?money(m.remainingInterest):'待补充'}</span></div></div><div class="account-card-foot"><span>${d.accountRef?'账户尾号 '+esc(d.accountRef):'还款中'}</span><button class="detail-link" data-detail="${esc(d.id)}">查看明细</button></div></article>`}
-function renderOverview(){
-  if(!$('#accountList'))return;const accounts=activeAccounts(),total=accounts.reduce((s,d)=>s+d.balance,0),interest=accounts.reduce((s,d)=>s+metrics(d).remainingInterest,0),interestMissing=accounts.some(d=>!metrics(d).interestKnown),paid=debts.reduce((s,d)=>s+metrics(d).paidAmount,0),paidTerms=accounts.reduce((s,d)=>s+metrics(d).paid,0),allTerms=accounts.reduce((s,d)=>s+metrics(d).total,0);
-  const next=accounts.filter(d=>d.due).sort((a,b)=>a.due.localeCompare(b.due));const due30=accounts.filter(d=>d.due&&daysUntil(d.due)>=0&&daysUntil(d.due)<=30).reduce((s,d)=>s+(d.payment||d.balance),0);const urgent=accounts.filter(d=>d.due&&daysUntil(d.due)>=0&&daysUntil(d.due)<=7);
-  $('#totalBalance').textContent=money(total);$('#monthDue').textContent=money(due30);$('#nextDue').textContent=next.length?fmtDate(next[0].due):'暂无';$('#activeCount').textContent=accounts.length+' 笔';$('#interestTotal').textContent=money(interest)+(interestMissing?' + 待补':'');$('#paidTotal').textContent=money(paid);$('#termTotal').textContent=paidTerms+' / '+allTerms+' 期';
-  $('#dueNotice').style.display=urgent.length?'block':'none';$('#dueNotice').textContent=urgent.length?`未来 7 天有 ${urgent.length} 笔还款，请留意到期日期。`:'';
-  $('#accountCount').textContent=accounts.length+' 笔 · 按还款日期排序';renderChart(accounts,total);$('#accountList').innerHTML=accounts.length?accounts.map(d=>accountCard(d,total)).join(''):'<div class="empty">目前没有还款中的账户。到“输入”页描述创建或更新账户即可。</div>';
-}
-function resolveAccount(ref){
-  if(!ref)return null;const id=String(ref.id||'');if(id){const byId=debts.find(d=>d.id===id);if(byId)return byId}
-  const key=String(ref.accountKey||'');if(key){const byKey=debts.find(d=>d.accountKey===key);if(byKey)return byKey}
-  const name=String(ref.accountName||ref.name||'').trim(),provider=String(ref.provider||'').trim(),accountRef=String(ref.accountRef||'').trim();
-  if(accountRef){const hits=debts.filter(d=>d.accountRef===accountRef&&(!provider||normText(d.provider||d.name)===normText(provider)));return hits.length===1?hits[0]:null}
-  if(name){const exact=debts.filter(d=>d.name===name||d.accountRef===name);if(exact.length===1)return exact[0];const providerExact=debts.filter(d=>d.provider===name);if(providerExact.length===1)return providerExact[0];const partial=debts.filter(d=>normText(d.name)===normText(name)||normText(d.provider)===normText(name));if(partial.length===1)return partial[0]}
-  if(provider){const hits=debts.filter(d=>normText(d.provider||d.name)===normText(provider));if(hits.length===1)return hits[0]}
-  return null;
-}
-function reconcileChanges(changes){return (Array.isArray(changes)?changes:[]).map((raw,i)=>{const c={...raw};const old=resolveAccount(c);if(old){c.id=old.id;c.action='update';c.name=old.name;c.provider=c.provider||old.provider||old.name;c.accountRef=c.accountRef||old.accountRef;c.accountKey=old.accountKey||makeKey(c.provider,c.accountRef)}else{c.action='create';c.provider=c.provider||c.name||'新账户';c.accountRef=c.accountRef||'';c.accountKey=makeKey(c.provider,c.accountRef)||('new:'+i+':'+uid());c.name=c.name||c.provider+(c.accountRef?' · '+c.accountRef:'')}return c})}
-function calcChange(c){
-  const old=resolveAccount(c),num=(v,f=0)=>v==null?f:Math.max(0,Number(v)||0);
-  const original=num(c.originalAmount,old?old.originalAmount:0),payment=num(c.payment,old?old.payment:0);
-  let total=Math.floor(num(c.total,old?old.total:0));if(!total&&original&&payment)total=Math.ceil(original/payment);
-  let paidInput=c.paidPeriods!=null?Math.floor(num(c.paidPeriods)):null;
-  let remainInput=c.remain!=null?Math.floor(num(c.remain)):null;
-  let remain=remainInput!=null?remainInput:(paidInput!=null?Math.max(0,total-paidInput):(old?old.remain:total));
-  if(!total&&remain>0)total=remain+(paidInput||0);
-  const paid=paidInput!=null?paidInput:Math.max(0,total-remain);
-  const recalcRepayment=c.totalRepayment==null&&(c.payment!=null||c.total!=null||c.originalAmount!=null)&&payment&&total;
-  let totalRepayment=c.totalRepayment!=null?num(c.totalRepayment):(recalcRepayment?payment*total:(old&&old.totalRepayment?old.totalRepayment:(payment&&total?payment*total:original)));
-  if(!totalRepayment&&payment&&total)totalRepayment=payment*total;
-  const canDeriveInterest=original>0&&totalRepayment>0&&(c.totalRepayment!=null||(payment>0&&total>0));
-  const estimatedInterest=c.estimatedInterest!=null?num(c.estimatedInterest):(canDeriveInterest?Math.max(0,totalRepayment-original):(old&&old.estimatedInterest!=null?old.estimatedInterest:null));
-  const scheduleChanged=c.payment!=null||c.total!=null||c.totalRepayment!=null||c.originalAmount!=null;
-  let balance=c.balance!=null?num(c.balance):(c.remain!=null&&payment?Math.min(totalRepayment,payment*remain):(paidInput!=null&&payment?Math.max(0,totalRepayment-payment*paid):(scheduleChanged&&payment&&total?Math.min(totalRepayment,payment*remain):(old?old.balance:totalRepayment))));
-  if(c.balance==null&&c.paidPeriods!=null&&c.remain==null&&payment)balance=Math.max(0,totalRepayment-payment*paid);
-  return {originalAmount:original,totalRepayment,estimatedInterest,annualRate:num(c.annualRate,old?old.annualRate:0),balance,payment,total,remain,due:c.due!=null?String(c.due):old?old.due:'',note:c.note!=null?String(c.note):old?old.note:'',paid,pct:total?Math.min(100,Math.max(0,paid/total*100)):0};
-}
-function normalizePlan(parsed){
-  const changes=reconcileChanges(parsed.changes||parsed.updates||[]);
-  const payments=(Array.isArray(parsed.payments)?parsed.payments:[]).map(p=>{const d=resolveAccount(p);return {...p,id:d?d.id:(p.id||''),accountName:d?d.name:(p.accountName||p.name||p.provider||'未匹配账户'),_matched:!!d}});
-  const deletions=(Array.isArray(parsed.deletions)?parsed.deletions:[]).map(p=>{const d=resolveAccount(p);return {...p,id:d?d.id:(p.id||''),accountName:d?d.name:(p.accountName||p.name||p.provider||'未匹配账户'),_matched:!!d}});
-  const pref=parsed.preferences||{};let style=String(pref.chartStyle||pref.chart||'');if(/环形|圆环|donut/i.test(style))style='donut';else if(/条形|横条|bar/i.test(style))style='bars';else if(/列表|清单|list/i.test(style))style='list';else style='';
-  return {changes,payments,deletions,preferences:{chartStyle:style},notes:Array.isArray(parsed.notes)?parsed.notes:[]};
-}
-function paymentPreview(p){const d=debts.find(x=>x.id===p.id);if(!d)return '';const amount=Math.max(0,Number(p.amount)||0),after=p.balanceAfter!=null?Math.max(0,Number(p.balanceAfter)||0):Math.max(0,d.balance-amount),periods=Math.max(0,parseInt(p.periodsPaid,10)||0),remain=p.remainAfter!=null?Math.max(0,parseInt(p.remainAfter,10)||0):Math.max(0,d.remain-periods);return `还款 ${money(amount)}，余额 ${money(d.balance)} → ${money(after)}，剩余 ${remain} 期`}
-function showPreview(plan){
-  let html='<div class="result-title">识别预览</div>';let n=0;
-  plan.changes.forEach(c=>{const p=calcChange(c);html+=`<div class="result-line"><b>${c.action==='create'?'创建账户':'更新账户'}：${esc(c.name)}</b><div>待还 ${money(p.balance)} · 每期 ${money(p.payment)}</div><div>已还 / 剩余 ${p.paid} / ${p.remain} 期 · 进度 ${p.pct.toFixed(1)}%</div><div>总利息估算 ${p.estimatedInterest==null?'待补充':money(p.estimatedInterest)} · 下期 ${esc(p.due||'待设置')}</div></div>`;n++});
-  plan.payments.forEach(p=>{html+=`<div class="result-line"><b>还款：${esc(p.accountName)}</b><div>${esc(paymentPreview(p)||'未匹配账户，无法录入')}</div></div>`;n++});
-  plan.deletions.forEach(p=>{html+=`<div class="result-line"><b>删除账户：${esc(p.accountName)}</b><div>${p._matched?'确认录入后将从本地账户中移除':'未匹配账户，无法删除'}</div></div>`;n++});
-  if(plan.preferences.chartStyle){html+=`<div class="result-line"><b>总览图表样式</b><div>${plan.preferences.chartStyle==='donut'?'环形图':plan.preferences.chartStyle==='bars'?'条形图':'明细列表'}</div></div>`;n++}
-  if(plan.notes.length)html+=`<div class="result-line result-muted">${plan.notes.map(esc).join('；')}</div>`;
-  if(!n)html+='<div class="result-muted">没有识别到可执行的账户更新。请补充平台名称、金额或操作对象。</div>';
-  const out=$('#aiResult');out.innerHTML=html;out.classList.add('show');
-}
-function applyPlan(plan){
-  let created=0,updated=0,paid=0,deleted=0,skipped=[];
-  plan.changes.forEach(c=>{let d=resolveAccount(c),p=calcChange(c);if(!d){d=normalize({id:uid(),name:c.name,provider:c.provider,accountRef:c.accountRef,accountKey:c.accountKey});debts.unshift(d);created++}else updated++;
-    d.name=c.name||d.name;d.provider=c.provider||d.provider||d.name;d.accountRef=c.accountRef||d.accountRef||'';d.accountKey=c.accountKey||d.accountKey||makeKey(d.provider,d.accountRef);d.originalAmount=p.originalAmount;d.totalRepayment=p.totalRepayment;d.estimatedInterest=p.estimatedInterest;d.annualRate=p.annualRate;d.balance=p.balance;d.payment=p.payment;d.total=p.total;d.remain=p.remain;d.due=p.due||d.due;d.note=p.note;d.updatedAt=new Date().toISOString();
+/* =========================================================
+   状态
+========================================================= */
+let words      = JSON.parse(localStorage.getItem('wm_words') || '[]');
+let checklist  = JSON.parse(localStorage.getItem('wm_checklist') || '[]');
+let stats      = JSON.parse(localStorage.getItem('wm_stats') || '{"apiCalls":0,"tokens":0}');
+let apiKey     = localStorage.getItem('wm_api_key') || '';
+let outTs      = Number(localStorage.getItem('wm_out_ts') || 0);
+let homeTs     = Number(localStorage.getItem('wm_home_ts') || 0);
+let batchQueue = [];
+let pendingCheckId = null;
+
+/* =========================================================
+   初始化
+========================================================= */
+function init(){
+  $('apiKeyInput').value = apiKey;
+  cleanupPhotos();
+  renderCards();
+  renderChecklist();
+  updateStatsUI();
+  tick();
+  setInterval(tick, 1000);
+  setInterval(() => { cleanupPhotos(); renderChecklist(); }, 60000);
+
+  $('searchInput').addEventListener('keypress', e => {
+    if (e.key === 'Enter') triggerSearch();
   });
-  plan.payments.forEach(p=>{const d=debts.find(x=>x.id===p.id);if(!d){skipped.push('未匹配还款账户：'+p.accountName);return}const amount=Math.max(0,Number(p.amount)||0);if(!amount){skipped.push('无效还款金额：'+p.accountName);return}const periods=Math.max(0,parseInt(p.periodsPaid,10)||0);d.balance=p.balanceAfter!=null?Math.max(0,Number(p.balanceAfter)||0):Math.max(0,Math.round((d.balance-amount)*100)/100);d.remain=p.remainAfter!=null?Math.max(0,parseInt(p.remainAfter,10)||0):Math.max(0,d.remain-periods);if(p.dueAfter)d.due=String(p.dueAfter);else if(periods>0&&d.due)d.due=addMonths(d.due,periods);d.paymentHistory=Array.isArray(d.paymentHistory)?d.paymentHistory:[];d.paymentHistory.unshift({date:p.date||localDateISO(),amount,balanceAfter:d.balance,periodsPaid:periods,note:p.note||''});d.updatedAt=new Date().toISOString();paid++});
-  plan.deletions.forEach(p=>{const i=debts.findIndex(x=>x.id===p.id);if(i<0){skipped.push('未匹配删除账户：'+p.accountName);return}debts.splice(i,1);deleted++});
-  if(plan.preferences.chartStyle){chartStyle=plan.preferences.chartStyle;saveCfg()}
-  persist();return {created,updated,paid,deleted,skipped};
 }
-function resultText(stats){const bits=[];if(stats.created)bits.push('新增 '+stats.created+' 笔');if(stats.updated)bits.push('更新 '+stats.updated+' 笔');if(stats.paid)bits.push('还款 '+stats.paid+' 笔');if(stats.deleted)bits.push('删除 '+stats.deleted+' 笔');if(!bits.length)bits.push('未发生账户数据变更');if(stats.skipped.length)bits.push('未执行：'+stats.skipped.join('；'));return bits.join('，')+'。已保存到本地。'}
-function currentContext(){const now=new Date();return {today:localDateISO(now),localTime:now.toLocaleString('zh-CN',{hour12:false}),timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'device-local',nowISO:now.toISOString()}}
-function buildInstruction(){
-  const accounts=debts.map(d=>({id:d.id,name:d.name,provider:d.provider,accountRef:d.accountRef,accountKey:d.accountKey,originalAmount:d.originalAmount,totalRepayment:d.totalRepayment,estimatedInterest:d.estimatedInterest,annualRate:d.annualRate,balance:d.balance,payment:d.payment,total:d.total,remain:d.remain,due:d.due,note:d.note}));
-  return `你是 Debt Focus 债务记账网页的语义理解引擎。用户会用完全自然的语言描述与债务、分期、还款相关的任何情况，你要自己理解用户的真实意图，并把它转换成可执行的结构化操作。没有任何固定句式、关键词或动作模板需要匹配，一切以你的理解为准。
 
-当前设备本地日期时间：${JSON.stringify(currentContext())}。请按设备时区理解“今天、明天、下周、月底”等相对时间，涉及日期时输出 YYYY-MM-DD。
+/* =========================================================
+   Tab 切换
+========================================================= */
+function switchTab(tabId){
+  document.querySelectorAll('.content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  $('tab-' + tabId).classList.add('active');
 
-现有账户：${JSON.stringify(accounts)}
+  const navs = document.querySelectorAll('.nav-item');
+  const map = {input:0, cards:1, checklist:2};
+  navs[map[tabId]].classList.add('active');
 
-只输出严格 JSON，不要 Markdown、不要解释性文字，结构如下：
-{"changes":[],"payments":[],"deletions":[],"preferences":{},"notes":[]}
+  const titles = {input:'单词录入', cards:'记忆卡片', checklist:'出行清单'};
+  $('header-title').innerText = titles[tabId];
 
-以下是各字段的含义，仅用于对齐数据结构，不构成对理解的限制：
-- changes：需要新建或更新的账户。可包含 action(create/update)、id、provider、accountRef、accountKey、name、originalAmount、totalRepayment、estimatedInterest、annualRate、balance、payment、total、paidPeriods、remain、due、note。
-- payments：已经实际发生的还款。可包含 id、accountName、amount、periodsPaid、balanceAfter、remainAfter、dueAfter、date、note。
-- deletions：需要移除的账户。可包含 id、accountName。
-- preferences：界面偏好，目前支持 chartStyle（donut=环形图，bars=条形图，list=列表）。
-- notes：需要向用户说明、或暂时无法执行的内容。
-
-如何拆分一句话里的多个意图、某个数字指的是本金还是余额还是每期金额、是登记一次还款还是调整月供、相对日期具体是哪一天、同一平台是否存在多个不同账户，全部由你根据用户原话和现有账户自行判断。匹配到已有账户时尽量复用其 id 或 provider/accountRef/accountKey，避免重复创建。不要臆造用户没有提供的信息：无法确定的字段直接省略或写入 notes，不要用 0 代替未知值。`;
+  if (tabId === 'cards') renderCards();
+  if (tabId === 'checklist') { cleanupPhotos(); renderChecklist(); }
+  if (tabId === 'input') updateStatsUI();
 }
-async function runAI(mode){
-  const text=$('#aiInput').value.trim(),key=$('#apiKey').value.trim();if(!text){alert('请先在输入框描述账户或还款操作。');return}if(!key){alert('请先到“设置”中输入 DeepSeek API Key。');return}if(busy)return;
-  const endpoint=$('#apiEndpoint').value.trim()||'https://api.deepseek.com/chat/completions',model=$('#apiModel').value.trim()||'deepseek-chat';busy=true;$('#previewBtn').disabled=$('#recordBtn').disabled=true;$('#previewBtn').textContent='处理中…';$('#recordBtn').textContent=mode==='record'?'处理中…':'录入';$('#aiResult').classList.add('show');$('#aiResult').textContent='正在识别账户、期数和金额…';
-  try{const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model,messages:[{role:'system',content:buildInstruction()},{role:'user',content:text}],temperature:0,response_format:{type:'json_object'}})});if(!response.ok)throw new Error('API 请求失败（HTTP '+response.status+'）');const data=await response.json(),content=data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content;if(!content)throw new Error('API 未返回有效内容');const parsed=JSON.parse(String(content).replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,''));const plan=normalizePlan(parsed);
-    if(mode==='preview'){showPreview(plan)}else{const stats=applyPlan(plan);$('#aiResult').innerHTML='<div class="result-title">录入完成</div><div>'+esc(resultText(stats))+'</div>'+(plan.notes.length?'<div class="result-muted">说明：'+plan.notes.map(esc).join('；')+'</div>':'');$('#aiInput').value=''}
-  }catch(e){$('#aiResult').textContent='识别失败：'+e.message+'。请检查 API Key、接口地址、模型或网络连接。'}finally{busy=false;$('#previewBtn').disabled=$('#recordBtn').disabled=false;$('#previewBtn').textContent='预览';$('#recordBtn').textContent='录入'}
+
+/* =========================================================
+   通用 API 调用
+========================================================= */
+async function callAI(messages){
+  const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer ' + apiKey},
+    body: JSON.stringify({model:'deepseek-chat', messages, temperature:0.6})
+  });
+  const data = await res.json();
+  stats.apiCalls++;
+  stats.tokens += Math.round(JSON.stringify(messages).length / 2) + 300;
+  saveStats();
+  if (!data.choices || !data.choices.length){
+    throw new Error((data.error && data.error.message) || 'API 返回异常');
+  }
+  return data.choices[0].message.content;
 }
-function exportData(){const blob=new Blob([JSON.stringify({schema:SCHEMA,version:4,exportedAt:new Date().toISOString(),debts},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='debt-focus-backup-'+localDateISO()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
-function saveCfg(){const cfg={endpoint:$('#apiEndpoint').value,model:$('#apiModel').value,remember:$('#rememberKey').checked,chartStyle};if(cfg.remember)cfg.key=$('#apiKey').value;try{localStorage.setItem(CFG,JSON.stringify(cfg))}catch(e){}if(!cfg.remember){try{sessionStorage.setItem('debt_focus_key',$('#apiKey').value)}catch(e){}}}
-function loadCfg(){try{const cfg=JSON.parse(localStorage.getItem(CFG)||'{}');if(cfg.endpoint)$('#apiEndpoint').value=cfg.endpoint;if(cfg.model)$('#apiModel').value=cfg.model;$('#rememberKey').checked=!!cfg.remember;$('#apiKey').value=cfg.remember?(cfg.key||''):(sessionStorage.getItem('debt_focus_key')||'');if(['donut','bars','list'].includes(cfg.chartStyle))chartStyle=cfg.chartStyle}catch(e){}}
-function openDetail(id){const d=debts.find(x=>x.id===id);if(!d)return;const m=metrics(d),paid=m.paid,total=m.total;let rows='';if(total){for(let i=1;i<=total;i++){const done=i<=paid,amount=i===total?Math.max(0,m.totalRepayment-(d.payment||0)*(total-1)):(d.payment||0),date=d.due?addMonths(d.due,i-paid-1):'待确认';const remain=Math.max(0,m.totalRepayment-(d.payment||0)*i);rows+=`<div class="schedule-row ${done?'paid-row':''}"><span>${i} / ${total}</span><span>${done?'已还':date}</span><span>${money(amount)} · 余 ${money(remain)}</span></div>`}}const logs=(d.paymentHistory||[]).map(x=>`<div class="log-row"><span>${fmtDate(String(x.date||'').slice(0,10))} · ${Number(x.periodsPaid)||0} 期</span><b>${money(x.amount)}</b></div>`).join('');$('#detailTitle').textContent=d.name+' · 分期明细';$('#detailBody').innerHTML=`<div class="detail-kpis"><div class="detail-kpi">原始本金<b>${money(m.original)}</b></div><div class="detail-kpi">当前待还<b style="color:#d93636">${money(d.balance)}</b></div><div class="detail-kpi">每期应还<b>${money(d.payment)}</b></div><div class="detail-kpi">剩余期数<b>${m.remain} 期</b></div><div class="detail-kpi">总利息估算<b>${m.interestKnown?money(m.interest):'待补充'}</b></div><div class="detail-kpi">剩余利息估算<b>${m.interestKnown?money(m.remainingInterest):'待补充'}</b></div><div class="detail-kpi">预计结清<b>${payoffDate(d)}</b></div><div class="detail-kpi">年利率<b>${d.annualRate?d.annualRate+'%':'未提供'}</b></div></div><div class="detail-progress"><i style="width:${m.pct.toFixed(2)}%"></i></div><div class="result-muted">已完成 ${m.pct.toFixed(1)}% · 已还 ${paid} 期 · 剩余 ${m.remain} 期</div><div class="schedule"><div class="schedule-row schedule-head"><span>期数</span><span>状态 / 日期</span><span>金额 / 余额</span></div>${rows||'<div class="empty">补充每期金额和期数后显示计划</div>'}</div>${logs?'<div class="payment-log"><h3>实际还款记录</h3>'+logs+'</div>':''}`;$('#detailOverlay').classList.add('show')}
-function switchPage(id){$$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===id));$$('.page').forEach(p=>p.classList.toggle('active',p.id===id))}
 
-$('#previewBtn').addEventListener('click',()=>runAI('preview'));$('#recordBtn').addEventListener('click',()=>runAI('record'));
-$$('.nav button').forEach(b=>b.addEventListener('click',()=>switchPage(b.dataset.page)));
-$('#accountList').addEventListener('click',e=>{const b=e.target.closest('[data-detail]');if(b)openDetail(b.dataset.detail)});
-$('#detailClose').addEventListener('click',()=>$('#detailOverlay').classList.remove('show'));
-$('#detailOverlay').addEventListener('click',e=>{if(e.target.id==='detailOverlay')$('#detailOverlay').classList.remove('show')});
-$('#exportBtn').addEventListener('click',exportData);$('#importBtn').addEventListener('click',()=>$('#importFile').click());
-$('#importFile').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const reader=new FileReader();reader.onload=()=>{try{const obj=JSON.parse(reader.result),list=Array.isArray(obj)?obj:obj.debts;if(!Array.isArray(list))throw new Error('格式无效');if(confirm('导入将覆盖当前账户数据，是否继续？')){debts=list.map(normalize);persist()}}catch(err){alert('备份文件格式无效，未导入。')}e.target.value=''};reader.readAsText(f)});
-['apiEndpoint','apiModel','apiKey','rememberKey'].forEach(id=>$('#'+id).addEventListener('change',saveCfg));
-window.addEventListener('pagehide',()=>{try{writeLocalMirrors(snapshot())}catch(e){}});
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){try{writeLocalMirrors(snapshot())}catch(e){}writeIDBSnapshot(snapshot()).catch(()=>{})}});
+/* =========================================================
+   批量处理
+========================================================= */
+function triggerSearch() {
+    const val = $('searchInput').value.trim();
+    if (!val) return;
+    $('searchInput').value = '';
+    $('searchInput').blur();
+    $('batchInput').value = val;
+    processBatch();
+}
 
-async function init(){loadCfg();const local=readLocalSnapshot();if(local)debts=local.debts.map(normalize);let restoredFromDB=false;try{const remote=await readIDBSnapshot();if(remote&&(!local||String(remote.savedAt)>String(local.savedAt))){debts=remote.debts.map(normalize);restoredFromDB=true}}catch(e){}renderOverview();if(restoredFromDB)setStorageStatus('已从 IndexedDB 恢复较新的本地数据，正在同步镜像',false);persist()}
+function clearBatch() {
+    $('batchInput').value = '';
+    $('batchInput').focus();
+}
+
+function processBatch() {
+    const text = $('batchInput').value.trim();
+    if (!text) { alert('请先输入或粘贴单词'); return; }
+    const wordsArr = text.split(/[\n,，]+/).map(w => w.trim()).filter(w => w);
+    const uniqueWords = [...new Set(wordsArr)];
+    if (uniqueWords.length === 0) return;
+    
+    $('batchInput').value = '';
+    $('recognizeStatus').innerHTML = '';
+    
+    batchQueue = [...uniqueWords];
+    processNextInQueue();
+}
+
+function processNextInQueue() {
+    if (batchQueue.length === 0) {
+        updateStatsUI();
+        return;
+    }
+    const word = batchQueue.shift();
+    addStatusItem(word, 'loading', '生成中...');
+    generateWordCard(word).then(() => {
+        updateStatusItem(word, 'done', '已完成');
+        processNextInQueue();
+    }).catch(err => {
+        updateStatusItem(word, 'fail', err.message || '失败');
+        processNextInQueue();
+    });
+}
+
+function addStatusItem(word, type, msg) {
+    const container = $('recognizeStatus');
+    if (container.querySelector('.empty-hint')) container.innerHTML = '';
+    
+    const id = 'st_' + word.replace(/[^a-zA-Z0-9]/g, '_');
+    if ($(id)) $(id).remove();
+    
+    const div = document.createElement('div');
+    div.className = 'status-item';
+    div.id = id;
+    div.innerHTML = `
+        <div class="dot ${type}"></div>
+        <div class="st-word">${esc(word)}</div>
+        <div class="st-msg">${esc(msg)}</div>
+    `;
+    container.prepend(div);
+}
+
+function updateStatusItem(word, type, msg) {
+    const id = 'st_' + word.replace(/[^a-zA-Z0-9]/g, '_');
+    const item = $(id);
+    if (item) {
+        item.querySelector('.dot').className = 'dot ' + type;
+        item.querySelector('.st-msg').innerText = msg;
+    }
+}
+
+/* =========================================================
+   单词卡生成
+========================================================= */
+async function generateWordCard(word) {
+    if (!apiKey) {
+        await new Promise(r => setTimeout(r, 600));
+        const mock = {
+            word: word,
+            phonetic: '/ˈmɒk/',
+            syllable: 'mock',
+            collins: 'adj. 模拟的；n. 模拟数据',
+            cn: 'n. 模拟数据；adj. 模拟的',
+            example: 'This is a mock example for testing.',
+            syn: 'fake, artificial',
+            ant: 'real, authentic'
+        };
+        saveWord(mock);
+        return;
+    }
+    
+    const prompt = `请为我生成单词 "${word}" 的详细记忆卡片，严格按照以下JSON格式输出，不要输出任何其他多余内容：
+{
+"word": "${word}",
+"phonetic": "音标",
+"syllable": "音节拆分（用点连接）",
+"collins": "柯林斯英文释义",
+"cn": "中文释义",
+"example": "英文例句（附带中文翻译）",
+"syn": "同义词",
+"ant": "反义词"
+}`;
+    
+    const res = await callAI([{role: 'user', content: prompt}]);
+    try {
+        const jsonStr = res.replace(/```json/g, '').replace(/```/g, '').trim();
+        const data = JSON.parse(jsonStr);
+        saveWord(data);
+    } catch (e) {
+        throw new Error('AI 解析失败');
+    }
+}
+
+function saveWord(data) {
+    if (words.find(w => w.word.toLowerCase() === data.word.toLowerCase())) return;
+    data.id = Date.now();
+    data.time = nowStr();
+    words.push(data);
+    localStorage.setItem('wm_words', JSON.stringify(words));
+    renderCards();
+}
+
+/* =========================================================
+   渲染单词卡
+========================================================= */
+function renderCards() {
+    const container = $('cardsContainer');
+    if (words.length === 0) {
+        container.innerHTML = '<div class="empty-state">暂无卡片，快去录入单词吧~</div>';
+        return;
+    }
+    
+    const sorted = [...words].reverse();
+    container.innerHTML = sorted.map(w => {
+        return `
+        <div class="flashcard">
+            <div class="card-header">
+                <div>
+                    <div class="word-big">${esc(w.word)}</div>
+                    ${w.phonetic ? `<div class="word-phonetic">${esc(w.phonetic)}</div>` : ''}
+                    ${w.syllable ? `<div class="word-syllable">${esc(w.syllable)}</div>` : ''}
+                </div>
+                <button class="delete-btn" onclick="deleteWord(${w.id})">删除</button>
+            </div>
+            <div class="card-body">
+                ${w.collins ? `<div class="sec"><div class="sec-label">柯林斯释义</div><div class="sec-body en">${esc(w.collins)}</div></div>` : ''}
+                ${w.cn ? `<div class="sec"><div class="sec-label">中文释义</div><div class="sec-body">${esc(w.cn)}</div></div>` : ''}
+                ${w.example ? `<div class="sec"><div class="sec-label">例句</div><div class="sec-body en">${esc(w.example)}</div></div>` : ''}
+                ${w.syn ? `<div class="sec"><div class="sec-label">同义词</div><div class="sec-body">${esc(w.syn)}</div></div>` : ''}
+                ${w.ant ? `<div class="sec"><div class="sec-label">反义词</div><div class="sec-body">${esc(w.ant)}</div></div>` : ''}
+            </div>
+            <div class="card-footer">${esc(w.time || '')}</div>
+        </div>`;
+    }).join('');
+}
+
+function deleteWord(id) {
+    if (!confirm('确定删除这张单词卡吗？')) return;
+    words = words.filter(w => w.id !== id);
+    localStorage.setItem('wm_words', JSON.stringify(words));
+    renderCards();
+    updateStatsUI();
+}
+
+/* =========================================================
+   图片上传（模拟）
+========================================================= */
+function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+        $('batchInput').value = 'abandon, cognitive';
+        event.target.value = '';
+        alert('图片已识别，单词已填入下方输入框，请点击“AI 识别生成卡片”。');
+    };
+    reader.readAsDataURL(file);
+}
+
+/* =========================================================
+   清单相关
+========================================================= */
+function cleanupPhotos() {
+    const now = Date.now();
+    let changed = false;
+    checklist.forEach(item => {
+        if (item.photo && item.photoTs && now - item.photoTs > THREE_DAYS) {
+            delete item.photo;
+            delete item.photoTs;
+            changed = true;
+        }
+    });
+    if (changed) {
+        localStorage.setItem('wm_checklist', JSON.stringify(checklist));
+    }
+}
+
+function renderChecklist() {
+    const container = $('checklistContainer');
+    if (checklist.length === 0) {
+        container.innerHTML = '<div class="empty-hint">暂无清单，添加一项吧</div>';
+        return;
+    }
+    
+    container.innerHTML = checklist.map(item => {
+        let photoHtml = '';
+        if (item.photo) {
+            photoHtml = `<img src="${item.photo}" class="check-photo">`;
+        }
+        let metaHtml = '';
+        if (item.doneTime) {
+            metaHtml = `<div class="check-meta">完成于 ${item.doneTime}</div>`;
+        }
+        
+        return `
+        <div class="check-item">
+            <div class="check-box ${item.done ? 'done' : ''}" onclick="toggleCheck(${item.id})">
+                <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="3" fill="none">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </div>
+            <div class="check-main">
+                <div class="check-text ${item.done ? 'done' : ''}">${esc(item.text)}</div>
+                ${photoHtml}
+                ${metaHtml}
+            </div>
+            <button class="delete-btn" onclick="deleteCheckItem(${item.id})">删除</button>
+        </div>`;
+    }).join('');
+}
+
+function addCheckItem() {
+    const text = $('checkInput').value.trim();
+    if (!text) return;
+    checklist.push({ id: Date.now(), text, done: false });
+    $('checkInput').value = '';
+    saveChecklist();
+    renderChecklist();
+}
+
+function deleteCheckItem(id) {
+    if (!confirm('删除此事项？')) return;
+    checklist = checklist.filter(i => i.id !== id);
+    saveChecklist();
+    renderChecklist();
+}
+
+function toggleCheck(id) {
+    const item = checklist.find(i => i.id === id);
+    if (!item) return;
+    if (item.done) {
+        item.done = false;
+        delete item.doneTime;
+        delete item.photo;
+        delete item.photoTs;
+        saveChecklist();
+        renderChecklist();
+    } else {
+        pendingCheckId = id;
+        $('photoModal').classList.add('active');
+        $('photoModalBody').innerText = `"${item.text}" 已完成，是否拍照记录？`;
+    }
+}
+
+function saveChecklist() {
+    localStorage.setItem('wm_checklist', JSON.stringify(checklist));
+    updateStatsUI();
+}
+
+function resetChecklist() {
+    checklist.forEach(item => {
+        item.done = false;
+        delete item.doneTime;
+    });
+    saveChecklist();
+    renderChecklist();
+    alert('已一键刷新完成状态');
+}
+
+function closePhotoModal() {
+    $('photoModal').classList.remove('active');
+    pendingCheckId = null;
+}
+
+function takeChecklistPhoto() {
+    $('checklistCamera').click();
+    closePhotoModal();
+}
+
+function handleChecklistPhoto(event) {
+    const file = event.target.files[0];
+    if (!file || !pendingCheckId) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const base64 = e.target.result;
+        const item = checklist.find(i => i.id === pendingCheckId);
+        if (item) {
+            item.done = true;
+            item.doneTime = nowStr();
+            item.photo = base64;
+            item.photoTs = Date.now();
+            saveChecklist();
+            renderChecklist();
+        }
+        event.target.value = '';
+        pendingCheckId = null;
+    };
+    reader.readAsDataURL(file);
+}
+
+async function analyzeChecklist() {
+    const pending = checklist.filter(i => !i.done);
+    const done = checklist.filter(i => i.done);
+    if (checklist.length === 0) { alert('清单为空'); return; }
+    
+    $('infoTitle').innerText = 'AI 清单分析';
+    $('infoBody').innerHTML = '<div style="text-align:center;padding:20px;color:#888;">正在分析...</div>';
+    $('infoModal').classList.add('active');
+    
+    if (!apiKey) {
+        setTimeout(() => {
+            $('infoBody').innerHTML = `
+                <p><strong>模拟分析结果：</strong></p>
+                <p>您共有 ${done.length} 项已完成，${pending.length} 项待办。</p>
+                <p>${pending.length > 0 ? '未完成事项：' + pending.map(p=>p.text).join('、') : '所有事项均已完成，太棒了！'}</p>
+                <p style="color:#999;font-size:12px;margin-top:10px;">(未配置API Key，此为模拟数据)</p>
+            `;
+        }, 800);
+        return;
+    }
+    
+    const prompt = `我有一份出行清单，状态如下：
+已完成：${done.map(d=>d.text).join('、') || '无'}
+待办：${pending.map(p=>p.text).join('、') || '无'}
+请给我一段简短的分析或提醒（100字以内），以HTML段落格式输出。`;
+    
+    try {
+        const res = await callAI([{role: 'user', content: prompt}]);
+        $('infoBody').innerHTML = res.replace(/\n/g, '<br>');
+    } catch (e) {
+        $('infoBody').innerHTML = `<span style="color:red;">分析失败：${e.message}</span>`;
+    }
+}
+
+function closeInfoModal() {
+    $('infoModal').classList.remove('active');
+}
+
+/* =========================================================
+   时钟与记录
+========================================================= */
+function recordOut() {
+    outTs = Date.now();
+    localStorage.setItem('wm_out_ts', outTs);
+    tick();
+}
+
+function recordHome() {
+    homeTs = Date.now();
+    localStorage.setItem('wm_home_ts', homeTs);
+    tick();
+}
+
+function tick() {
+    const d = new Date();
+    $('live-clock').innerText = d.toLocaleTimeString('zh-CN', {hour12:false});
+    $('live-date').innerText = d.toLocaleDateString('zh-CN', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+    
+    let log = '';
+    const fmt = ts => {
+        if (!ts) return '--:--';
+        const date = new Date(ts);
+        return date.toLocaleTimeString('zh-CN', {hour:'2-digit', minute:'2-digit'});
+    };
+    
+    if (outTs || homeTs) {
+        log = `出门：${fmt(outTs)} | 回家：${fmt(homeTs)}`;
+        if (outTs && homeTs && homeTs > outTs) {
+            const diff = Math.floor((homeTs - outTs) / 60000);
+            log += `<br>在外时长：${Math.floor(diff/60)} 小时 ${diff%60} 分钟`;
+        } else if (outTs && (!homeTs || homeTs < outTs)) {
+            const diff = Math.floor((Date.now() - outTs) / 60000);
+            log += `<br>已出门：${Math.floor(diff/60)} 小时 ${diff%60} 分钟`;
+        }
+    } else {
+        log = '今日暂无出入记录';
+    }
+    $('clock-log').innerHTML = log;
+}
+
+/* =========================================================
+   设置与导入导出
+========================================================= */
+function saveApiKey() {
+    apiKey = $('apiKeyInput').value.trim();
+    localStorage.setItem('wm_api_key', apiKey);
+    alert('API Key 已保存');
+}
+
+function updateStatsUI() {
+    $('stat-api-calls').innerText = stats.apiCalls;
+    $('stat-tokens').innerText = stats.tokens;
+    $('stat-words').innerText = words.length;
+    $('stat-checks').innerText = checklist.length;
+}
+
+function saveStats() {
+    localStorage.setItem('wm_stats', JSON.stringify(stats));
+    updateStatsUI();
+}
+
+function exportData() {
+    const data = { words, checklist, stats, exportTime: new Date().toISOString() };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `word_memory_backup_${new Date().getTime()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (data.words && data.checklist) {
+                words = data.words;
+                checklist = data.checklist;
+                stats = data.stats || {apiCalls:0, tokens:0};
+                localStorage.setItem('wm_words', JSON.stringify(words));
+                localStorage.setItem('wm_checklist', JSON.stringify(checklist));
+                localStorage.setItem('wm_stats', JSON.stringify(stats));
+                renderCards();
+                renderChecklist();
+                updateStatsUI();
+                alert('数据恢复成功！');
+            } else {
+                alert('文件格式不正确');
+            }
+        } catch (err) {
+            alert('读取文件失败');
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+}
+
+/* 启动 */
 init();
-})();
 </script>
 </body>
 </html>
