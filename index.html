@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="阅读">
 <title>英文阅读</title>
 <style>
-:root{--white:#fff;--bg:#f3f3f3;--soft:#f7f7f7;--line:#e5e5e5;--ink:#292929;--mid:#666;--muted:#999;--dark:#333;--reader-size:24px}
+:root{--white:#fff;--bg:#f3f3f3;--soft:#f7f7f7;--line:#e5e5e5;--ink:#292929;--mid:#666;--muted:#999;--dark:#333;--reader-size:26px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;width:100%;height:100%;min-height:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,"Helvetica Neue","PingFang SC","Microsoft YaHei",sans-serif}
 body{height:100vh;height:100dvh;display:flex;justify-content:center;overflow:hidden}
@@ -213,6 +213,65 @@ body{background-color:#e9eaed!important;background-image:none!important}
 main{position:relative;z-index:1}
 .bottom-nav{position:relative;z-index:20}
 
+
+/* Requested reading controls and typography refinements */
+.btn{font-size:13px}
+.icon-btn{font-size:13px}
+.small-btn{font-size:11px}
+.tab{font-size:12px}
+.popup-actions button{font-size:12px}
+.word-chip{font-size:13px}
+
+/* One continuous top glass toolbar, including the iPhone safe area */
+#panel-read{padding:0!important}
+#panel-read .reader-wrap{height:100%;min-height:0}
+.reader-toolbar{
+ position:relative;top:auto;z-index:5;flex:none;
+ display:flex;flex-wrap:nowrap;align-items:center;gap:6px;
+ min-height:calc(58px + env(safe-area-inset-top));
+ padding:calc(env(safe-area-inset-top) + 8px) 12px 9px;
+ background:rgba(233,234,237,.82);
+ border:0;border-bottom:1px solid rgba(255,255,255,.52);
+ border-radius:0;box-shadow:none;
+ -webkit-backdrop-filter:blur(26px) saturate(165%);
+ backdrop-filter:blur(26px) saturate(165%);
+}
+.reader-toolbar .icon-btn{
+ flex:none;height:36px;min-width:34px;padding:0 8px;
+ border:0;border-radius:11px;
+ background:rgba(255,255,255,.24);
+ box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;
+ color:#454950;font-size:13px;font-weight:650;
+}
+.reader-toolbar .icon-btn.active{
+ background:rgba(255,255,255,.68);
+ border:0;box-shadow:inset 0 1px 2px rgba(45,49,56,.07);
+}
+.reader-toolbar .font-tools{gap:3px;margin-left:auto;flex:none}
+.reader-toolbar .font-tools .icon-btn{min-width:34px;padding:0 6px}
+.reader-toolbar #font-label{min-width:18px;text-align:center;font-size:11px;color:#6e7279}
+#reader-scroll{padding:20px 22px calc(30px + env(safe-area-inset-bottom))}
+.article-body{font-size:26px;line-height:1.82}
+.article-paragraph{margin:0 0 .82em;text-align:left}
+.article-sentence{display:inline;border-radius:5px;transition:background .16s ease,color .16s ease}
+.article-body.has-focus .article-sentence:not(.is-focused){color:#85888e}
+.article-sentence.is-focused{
+ background:#fff0a6;
+ box-shadow:0 0 0 4px #fff0a6;
+ color:#25231b;font-weight:550;border-radius:4px;
+}
+@media(max-width:480px){
+ .reader-toolbar{
+  gap:4px;padding:calc(env(safe-area-inset-top) + 6px) 9px 8px;
+  min-height:calc(53px + env(safe-area-inset-top));
+ }
+ .reader-toolbar .icon-btn{height:35px;min-width:31px;padding:0 6px;font-size:13px}
+ .reader-toolbar .font-tools{gap:2px}
+ .reader-toolbar .font-tools .icon-btn{min-width:30px;padding:0 5px}
+ #reader-scroll{padding:17px 17px calc(28px + env(safe-area-inset-bottom))}
+ .article-body{font-size:26px;line-height:1.8}
+}
+
 </style>
 </head>
 <body>
@@ -227,10 +286,6 @@ main{position:relative;z-index:1}
   <div class="btn-row"><button class="btn primary" id="btn-clean">AI 整理并开始阅读</button><button class="btn" id="btn-read-direct">直接阅读</button><button class="btn" id="btn-clear">清空</button></div>
   <div class="status" id="paste-status" role="status" aria-live="polite"></div>
  </div>
- <div class="card">
-  <div class="section-head"><h2>阅读说明</h2></div>
-  <div class="hint">粘贴英文后，可选择 AI 清理网页噪音，也可以直接进入阅读。阅读时支持字号调整、句子聚焦、选词查义、朗读和收藏。</div>
- </div>
 </section>
 <section class="panel" id="panel-read" style="padding:0;overflow:hidden">
  <div class="reader-wrap">
@@ -239,7 +294,7 @@ main{position:relative;z-index:1}
    <button class="icon-btn" id="btn-favorite" title="收藏文章">☆</button>
    <button class="icon-btn" id="btn-speak">朗读</button><button class="icon-btn" id="btn-copy-article">复制格式</button>
    <button class="icon-btn" id="btn-stop">停止</button>
-   <div class="font-tools"><button class="icon-btn" id="font-down">A−</button><span id="font-label">21</span><button class="icon-btn" id="font-up">A+</button></div>
+   <div class="font-tools"><button class="icon-btn" id="font-down">A−</button><span id="font-label">26</span><button class="icon-btn" id="font-up">A+</button></div>
   </div>
   <div id="reader-scroll"><article class="reading-document"><h1 class="reader-title" id="reader-title"></h1><div class="reader-meta" id="reader-meta"></div><div class="article-body" id="article-body"><div class="empty">请先粘贴英文文章。</div></div></article></div>
  </div>
@@ -274,7 +329,7 @@ main{position:relative;z-index:1}
 'use strict';
 const $=s=>document.querySelector(s),$$=s=>Array.from(document.querySelectorAll(s));
 const KEY='manageplan_read_v1';
-const defaults={api:'',base:'https://api.deepseek.com',model:'deepseek-flash',input:'',article:'',title:'我的英文文章',font:24,favorites:[],words:[],stats:{calls:0,prompt:0,completion:0,total:0}};
+const defaults={api:'',base:'https://api.deepseek.com',model:'deepseek-flash',input:'',article:'',title:'我的英文文章',font:26,favorites:[],words:[],stats:{calls:0,prompt:0,completion:0,total:0}};
 function load(){try{return {...defaults,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){return {...defaults}}}
 let S=load(),current={id:'',title:S.title||'我的英文文章',content:S.article||''},pending='',focusFrame=0;
 S.favorites=Array.isArray(S.favorites)?S.favorites:[];S.words=Array.isArray(S.words)?S.words:[];
@@ -286,8 +341,31 @@ function showStatus(msg,type){const e=$('#paste-status');e.textContent=msg;e.cla
 function tab(name){$$('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));$$('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+name));if(name==='saved')renderSaved();if(name==='read')requestAnimationFrame(scheduleFocus)}
 $$('.tab').forEach(b=>b.addEventListener('click',()=>tab(b.dataset.tab)));
 function splitParagraphs(t){const raw=String(t||'').replace(/\r\n?/g,'\n').replace(/[\u2028\u2029]/g,'\n').trim();if(!raw)return [];const hasBlank=/\n[\t ]*\n+/.test(raw);return raw.split(hasBlank?/\n[\t ]*\n+/:/\n+/).map(x=>x.replace(/[\t ]+/g,' ').trim()).filter(Boolean)}
-function sentences(p){return (String(p).match(/[^.!?]+[.!?]+[”’"'»）)\]}】』」]*|[^.!?]+$/g)||[p]).map(x=>x.trim()).filter(Boolean)}
-function renderArticle(t){const ps=splitParagraphs(t);if(!ps.length)return '<div class="empty">没有可显示的正文内容。</div>';return ps.map(p=>'<p class="article-paragraph">'+sentences(p).map(s=>'<span class="article-sentence">'+esc(s)+'</span>').join(' ')+'</p>').join('')}
+function sentences(p){
+ const src=String(p||'').replace(/\s+/g,' ').trim();if(!src)return [];
+ const out=[];let start=0;
+ for(let i=0;i<src.length;i++){
+  const ch=src[i];if(ch!=='.'&&ch!=='!'&&ch!=='?')continue;
+  if(ch==='.'&&/\d/.test(src[i-1]||'')&&/\d/.test(src[i+1]||''))continue;
+  const token=src.slice(Math.max(start,src.lastIndexOf(' ',i-1)+1),i+1);
+  if(ch==='.'&&/^(?:Mr|Mrs|Ms|Dr|Prof|Sr|Jr|St|vs|etc|No|Fig|Inc|Ltd)\.$/i.test(token))continue;
+  let j=i+1;
+  while(j<src.length&&/[.!?]/.test(src[j]))j++;
+  while(j<src.length&&/["'”’»）)\]}】』」]/.test(src[j]))j++;
+  if(j===src.length||/\s/.test(src[j])){
+   const part=src.slice(start,j).trim();if(part)out.push(part);
+   while(j<src.length&&/\s/.test(src[j]))j++;
+   start=j;i=j-1;
+  }
+ }
+ const rest=src.slice(start).trim();if(rest)out.push(rest);
+ return out;
+}
+function renderArticle(t){
+ const ps=splitParagraphs(t);if(!ps.length)return '<div class="empty">没有可显示的正文内容。</div>';
+ const rows=[];ps.forEach(p=>sentences(p).forEach(s=>rows.push(s)));
+ return rows.map(s=>'<p class="article-paragraph"><span class="article-sentence">'+esc(s)+'</span></p>').join('');
+}
 function openArticle(t,title){current={id:'article-'+Date.now(),title:title||'我的英文文章',content:t};S.article=t;S.title=current.title;save();$('#reader-title').textContent=current.title;$('#reader-meta').textContent=wordCount(t).toLocaleString()+' words · '+t.length.toLocaleString()+' characters';$('#article-body').innerHTML=renderArticle(t);$('#reader-scroll').scrollTop=0;updateFavoriteButton();tab('read');updateFocus()}
 function updateTopCount(){}
 function setFont(n){S.font=Math.max(18,Math.min(34,Number(n)||24));document.documentElement.style.setProperty('--reader-size',S.font+'px');$('#font-label').textContent=S.font;save()}
@@ -310,14 +388,87 @@ $('#btn-favorite').addEventListener('click',()=>{if(!current.content)return;if(i
 function renderSaved(){const box=$('#saved-list');box.innerHTML='';$('#saved-count').textContent=S.favorites.length+' 篇';if(!S.favorites.length){box.innerHTML='<div class="empty">收藏的文章会保存在当前设备。</div>';return}S.favorites.forEach((a,i)=>{const row=document.createElement('div');row.className='saved-item';const open=document.createElement('button');open.className='saved-main';open.innerHTML='<div class="saved-title">'+esc(a.title||'未命名文章')+'</div><div class="saved-meta">'+wordCount(a.content).toLocaleString()+' words · '+new Date(a.createdAt||Date.now()).toLocaleDateString()+'</div>';open.addEventListener('click',()=>openArticle(a.content,a.title));const del=document.createElement('button');del.className='small-btn';del.textContent='删除';del.addEventListener('click',()=>{S.favorites.splice(i,1);save();renderSaved();updateFavoriteButton()});row.append(open,del);box.append(row)})}
 function renderWords(){const box=$('#word-list');box.innerHTML='';$('#word-empty').style.display=S.words.length?'none':'block';S.words.forEach((w,i)=>{const b=document.createElement('button');b.className='word-chip';b.textContent=w+' ×';b.title='点击移除';b.addEventListener('click',()=>{S.words.splice(i,1);save();renderWords()});box.append(b)})}
 renderSaved();renderWords();
-function hidePopup(){const p=$('#selection-popup');p.style.display='none';pending='';$('#pop-meaning').hidden=true;$('#pop-meaning').textContent=''}
-function showPopup(rect,v){pending=v;const p=$('#selection-popup');$('#pop-meaning').hidden=true;$('#pop-meaning').textContent='';p.style.display='block';requestAnimationFrame(()=>{const w=p.offsetWidth,h=p.offsetHeight,left=Math.max(10,Math.min(rect.left,innerWidth-w-10));let top=rect.top-h-8;if(top<5)top=Math.min(innerHeight-h-8,rect.bottom+8);p.style.left=left+'px';p.style.top=top+'px'})}
-function selection(){setTimeout(()=>{const s=getSelection(),v=s?s.toString().trim():'';if(!v||v.length>80||!s.rangeCount||!$('#article-body').contains(s.getRangeAt(0).commonAncestorContainer)){hidePopup();return}showPopup(s.getRangeAt(0).getBoundingClientRect(),v)},30)}
-$('#article-body').addEventListener('mouseup',selection);$('#article-body').addEventListener('touchend',selection);document.addEventListener('selectionchange',()=>{if($('#panel-read').classList.contains('active'))selection()});$('#pop-close').addEventListener('click',hidePopup);$('#pop-copy').addEventListener('click',async()=>{const v=pending;if(!v)return;await copyText(v);$('#pop-copy').textContent='已复制';setTimeout(()=>$('#pop-copy').textContent='复制',1000)});document.addEventListener('pointerdown',e=>{if(!$('#selection-popup').contains(e.target)&&!$('#article-body').contains(e.target))hidePopup()});
-$('#pop-add').addEventListener('click',()=>{const v=pending.trim();if(v&&!S.words.some(w=>w.toLowerCase()===v.toLowerCase())){S.words.unshift(v);save();renderWords()}hidePopup()});
-async function copyText(text){try{await navigator.clipboard.writeText(text)}catch(e){const a=document.createElement('textarea');a.value=text;a.style.position='fixed';a.style.opacity='0';document.body.append(a);a.select();document.execCommand('copy');a.remove()}}
+let popupPointerActive=false,popupBusy=false,selectionTimer=0;
+function hidePopup(clear=true){
+ const p=$('#selection-popup');p.style.display='none';$('#pop-meaning').hidden=true;$('#pop-meaning').textContent='';
+ if(clear){pending='';pendingContext=''}
+}
+function showPopup(rect,v,context){
+ pending=v;pendingContext=context||'';
+ const p=$('#selection-popup');$('#pop-meaning').hidden=true;$('#pop-meaning').textContent='';
+ p.style.display='block';
+ requestAnimationFrame(()=>{
+  const w=p.offsetWidth,h=p.offsetHeight;
+  const left=Math.max(10,Math.min(rect.left,innerWidth-w-10));
+  let top=rect.top-h-8;if(top<5)top=Math.min(innerHeight-h-8,rect.bottom+8);
+  p.style.left=left+'px';p.style.top=top+'px';
+ });
+}
+function selection(){
+ if(popupPointerActive||popupBusy)return;
+ clearTimeout(selectionTimer);
+ selectionTimer=setTimeout(()=>{
+  if(popupPointerActive||popupBusy)return;
+  const s=window.getSelection(),v=s?s.toString().trim():'';
+  if(!v||v.length>120||!s.rangeCount){hidePopup();return}
+  const range=s.getRangeAt(0),node=range.commonAncestorContainer;
+  if(!$('#article-body').contains(node)){hidePopup();return}
+  let el=node.nodeType===1?node:node.parentElement;
+  const sentence=el&&el.closest?el.closest('.article-sentence'):null;
+  const context=sentence?sentence.textContent.trim():'';
+  showPopup(range.getBoundingClientRect(),v,context);
+ },55);
+}
+$('#selection-popup').addEventListener('pointerdown',()=>{popupPointerActive=true},true);
+$('#selection-popup').addEventListener('pointerup',()=>{setTimeout(()=>{popupPointerActive=false},100)},true);
+$('#article-body').addEventListener('mouseup',selection);
+$('#article-body').addEventListener('touchend',selection,{passive:true});
+document.addEventListener('selectionchange',()=>{if($('#panel-read').classList.contains('active'))selection()});
+$('#pop-close').addEventListener('click',()=>hidePopup());
+document.addEventListener('pointerdown',e=>{
+ if(!$('#selection-popup').contains(e.target)&&!$('#article-body').contains(e.target))hidePopup();
+});
+function cleanSelectedTerm(v){
+ return String(v||'').trim().replace(/^[^A-Za-z0-9]+|[^A-Za-z0-9]+$/g,'').trim();
+}
+$('#pop-copy').addEventListener('click',async()=>{
+ const v=pending;if(!v)return;
+ const ok=await copyText(v),b=$('#pop-copy');
+ b.textContent=ok?'已复制':'复制失败';
+ setTimeout(()=>{b.textContent='复制'},1100);
+});
+$('#pop-add').addEventListener('click',()=>{
+ const v=cleanSelectedTerm(pending),m=$('#pop-meaning');
+ if(!v){m.hidden=false;m.textContent='请先选中要加入的英文单词或短语。';return}
+ const exists=S.words.some(w=>String(w).trim().toLowerCase()===v.toLowerCase());
+ if(!exists){S.words.unshift(v);save();renderWords();m.textContent='已加入生词本';}
+ else{m.textContent='这个词已在生词本中';}
+ m.hidden=false;popupBusy=true;
+ setTimeout(()=>{popupBusy=false;hidePopup()},1100);
+});
+async function copyText(text){
+ const value=String(text||'');if(!value)return false;
+ try{if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(value);return true}}catch(e){}
+ const a=document.createElement('textarea');a.value=value;a.setAttribute('readonly','');
+ a.style.position='fixed';a.style.left='-9999px';a.style.top='0';a.style.opacity='0';
+ document.body.appendChild(a);a.focus();a.select();a.setSelectionRange(0,a.value.length);
+ let ok=false;try{ok=document.execCommand('copy')}catch(e){}a.remove();return ok;
+}
 $('#btn-copy-article').addEventListener('click',async()=>{const paragraphs=splitParagraphs(current.content||'');const formatted=[current.title||'英文文章',...paragraphs].join('\n\n');if(!paragraphs.length)return;await copyText(formatted);const b=$('#btn-copy-article');b.textContent='已复制';setTimeout(()=>b.textContent='复制格式',1200)});
-$('#pop-lookup').addEventListener('click',async()=>{if(!pending)return;const v=pending,m=$('#pop-meaning');m.hidden=false;m.textContent='查询中…';try{m.textContent=await ai([{role:'system',content:'You are a concise English-Chinese dictionary. Explain the given English word or phrase in Chinese. Include part of speech, pronunciation if useful, and the meaning in this sentence if context is available. Keep it concise.'},{role:'user',content:v}],{temperature:0,maxTokens:220})}catch(e){m.textContent=e.message}});
+$('#pop-lookup').addEventListener('click',async()=>{
+ const v=cleanSelectedTerm(pending),context=pendingContext,m=$('#pop-meaning'),b=$('#pop-lookup');
+ if(!v){m.hidden=false;m.textContent='请先选中要查询的英文单词或短语。';return}
+ popupBusy=true;b.disabled=true;m.hidden=false;m.textContent='正在查询…';
+ try{
+  const prompt=context?'词语：'+v+'\n所在句子：'+context:'词语：'+v;
+  const answer=await ai([
+   {role:'system',content:'You are an accurate, concise English-Chinese dictionary. Explain the supplied English word or phrase in Simplified Chinese. Give its part of speech, IPA pronunciation when useful, the meaning that fits the provided sentence, and one short usage note only when helpful. Do not invent context. Format the answer in short readable lines.'},
+   {role:'user',content:prompt}
+  ],{temperature:0,maxTokens:320});
+  m.textContent=answer;
+ }catch(e){m.textContent=e&&e.message?e.message:'查词失败，请检查网络和 API 设置。'}
+ finally{b.disabled=false;popupBusy=false;}
+});
 $('#btn-speak').addEventListener('click',()=>{if(!current.content)return;if(!('speechSynthesis'in window)){showStatus('当前浏览器不支持朗读');return}speechSynthesis.cancel();const parts=splitParagraphs(current.content);parts.forEach((p,i)=>{const u=new SpeechSynthesisUtterance(p);u.lang='en-US';u.rate=.94;speechSynthesis.speak(u)});$('#btn-speak').classList.add('active')});
 $('#btn-stop').addEventListener('click',()=>{if('speechSynthesis'in window)speechSynthesis.cancel();$('#btn-speak').classList.remove('active')});
 $('#btn-save').addEventListener('click',()=>{const key=$('#api-key').value.trim(),url=$('#base-url').value.trim()||'https://api.deepseek.com';try{const u=new URL(url);if(!['http:','https:'].includes(u.protocol))throw Error()}catch(e){$('#save-status').textContent='接口地址无效';return}S.api=key;S.base=url.replace(/\/+$/,'');S.model=$('#model').value;save();$('#save-status').textContent='设置已保存'});
@@ -325,7 +476,7 @@ $('#api-key').value=S.api;$('#base-url').value=S.base;$('#model').value=S.model;
 function renderStats(){['calls','prompt','completion','total'].forEach(k=>$('#stat-'+k).textContent=Number(S.stats[k]||0).toLocaleString())}
 renderStats();$('#btn-reset').addEventListener('click',()=>{S.stats={calls:0,prompt:0,completion:0,total:0};save();renderStats()});
 $('#btn-copy-words').addEventListener('click',async()=>{if(!S.words.length)return;const t=S.words.join('\n');try{await navigator.clipboard.writeText(t)}catch(e){const a=document.createElement('textarea');a.value=t;document.body.append(a);a.select();document.execCommand('copy');a.remove()}$('#btn-copy-words').textContent='已复制';setTimeout(()=>$('#btn-copy-words').textContent='复制全部',1200)});
-if(S.article){current={id:'stored',title:S.title||'上次阅读文章',content:S.article};$('#reader-title').textContent=current.title;$('#reader-meta').textContent=wordCount(current.content)+' words';$('#article-body').innerHTML=renderArticle(current.content);updateFavoriteButton()}if(!S.font||S.font<24)setFont(24);
+if(S.article){current={id:'stored',title:S.title||'上次阅读文章',content:S.article};$('#reader-title').textContent=current.title;$('#reader-meta').textContent=wordCount(current.content)+' words';$('#article-body').innerHTML=renderArticle(current.content);updateFavoriteButton()}if(!S.font||S.font<26)setFont(26);
 })();
 </script>
 </body></html>
