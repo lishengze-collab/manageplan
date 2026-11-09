@@ -501,8 +501,14 @@ let S=load(),current={id:'',title:'',content:S.article||''},pending='',pendingCo
 S.favorites=Array.isArray(S.favorites)?S.favorites:[];S.words=Array.isArray(S.words)?S.words:[];
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));return true}catch(e){return false}}
-function wordCount(t){return (String(t||'').match(/[A-Za-z]+(?:['’-][A-Za-z]+)*|[\\u3400-\\u9fff]+/g)||[]).length}
-function updateCount(){const t=$('#raw-input').value;$('#input-count').textContent=t.length.toLocaleString()+' / 120,000';const en=(t.match(/[A-Za-z]+(?:['’-][A-Za-z]+)*/g)||[]).length,zh=(t.match(/[\\u3400-\\u9fff]/g)||[]).length;$('#word-count').textContent=en.toLocaleString()+' English words · '+zh.toLocaleString()+' 汉字'}
+function wordCount(t){return (String(t||'').match(/[A-Za-z]+(?:['’-][A-Za-z]+)*|[\u3400-\u9fff]+/g)||[]).length}
+function updateCount(){
+ const t=$('#raw-input').value;
+ $('#input-count').textContent=t.length.toLocaleString()+' / 120,000';
+ const en=(t.match(/[A-Za-z]+(?:['’-][A-Za-z]+)*/g)||[]).length;
+ const zh=(t.match(/[\u3400-\u9fff]/g)||[]).length;
+ $('#word-count').textContent=en.toLocaleString()+' English words · '+zh.toLocaleString()+' 汉字';
+}
 function showStatus(msg,type){const e=$('#paste-status');e.textContent=msg;e.className='status '+(type||'')}
 function tab(name){$$('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));$$('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+name));if(name==='saved')renderSaved();if(name==='read')requestAnimationFrame(scheduleFocus)}
 $$('.tab').forEach(b=>b.addEventListener('click',()=>tab(b.dataset.tab)));
@@ -599,7 +605,7 @@ document.addEventListener('pointerdown',e=>{
  if(!$('#selection-popup').contains(e.target)&&!$('#article-body').contains(e.target))hidePopup();
 });
 function cleanSelectedTerm(v){
- return String(v||'').trim().replace(/^[\\p{P}\\p{S}\\s]+|[\\p{P}\\p{S}\\s]+$/gu,'').trim();
+ return String(v||'').trim().replace(/^[\p{P}\p{S}\s]+|[\p{P}\p{S}\s]+$/gu,'').trim();
 }
 $('#pop-copy').addEventListener('click',async()=>{
  const v=pending;if(!v)return;
@@ -624,7 +630,14 @@ async function copyText(text){
  document.body.appendChild(a);a.focus();a.select();a.setSelectionRange(0,a.value.length);
  let ok=false;try{ok=document.execCommand('copy')}catch(e){}a.remove();return ok;
 }
-$('#btn-copy-article').addEventListener('click',async()=>{const paragraphs=splitParagraphs(current.content||'');const formatted=paragraphs.join('\\n\\n');if(!formatted)return;const ok=await copyText(formatted);const b=$('#btn-copy-article');b.textContent=ok?'已复制':'复制失败';setTimeout(()=>b.textContent='复制正文',1200)});
+$('#btn-copy-article').addEventListener('click',async()=>{
+ const paragraphs=splitParagraphs(current.content||'');
+ const formatted=paragraphs.join('\n\n');
+ if(!formatted)return;
+ const ok=await copyText(formatted),b=$('#btn-copy-article');
+ b.textContent=ok?'已复制':'复制失败';
+ setTimeout(()=>b.textContent='复制正文',1200);
+});
 $('#pop-lookup').addEventListener('click',async()=>{
  const v=cleanSelectedTerm(pending),context=pendingContext,m=$('#pop-meaning'),b=$('#pop-lookup');
  if(!v){m.hidden=false;m.textContent='请先选中要查询的英文单词或短语。';return}
@@ -639,7 +652,18 @@ $('#pop-lookup').addEventListener('click',async()=>{
  }catch(e){m.textContent=e&&e.message?e.message:'查词失败，请检查网络和 API 设置。'}
  finally{b.disabled=false;popupBusy=false;}
 });
-$('#btn-speak').addEventListener('click',()=>{if(!current.content)return;if(!('speechSynthesis'in window)){showStatus('当前浏览器不支持朗读');return}speechSynthesis.cancel();const parts=splitParagraphs(current.content).flatMap(p=>sentences(p));parts.forEach(p=>{const u=new SpeechSynthesisUtterance(p);u.lang=/[\\u3400-\\u9fff]/.test(p)?'zh-CN':'en-US';u.rate=.94;speechSynthesis.speak(u)});$('#btn-speak').classList.add('active')});
+$('#btn-speak').addEventListener('click',()=>{
+ if(!current.content)return;
+ if(!('speechSynthesis'in window)){showStatus('当前浏览器不支持朗读');return}
+ speechSynthesis.cancel();
+ const parts=splitParagraphs(current.content).flatMap(p=>sentences(p));
+ parts.forEach(p=>{
+  const u=new SpeechSynthesisUtterance(p);
+  u.lang=/[\u3400-\u9fff]/.test(p)?'zh-CN':'en-US';
+  u.rate=.94;speechSynthesis.speak(u);
+ });
+ $('#btn-speak').classList.add('active');
+});
 $('#btn-stop').addEventListener('click',()=>{if('speechSynthesis'in window)speechSynthesis.cancel();$('#btn-speak').classList.remove('active')});
 $('#btn-save').addEventListener('click',()=>{const key=$('#api-key').value.trim(),url=$('#base-url').value.trim()||'https://api.deepseek.com';try{const u=new URL(url);if(!['http:','https:'].includes(u.protocol))throw Error()}catch(e){$('#save-status').textContent='接口地址无效';return}S.api=key;S.base=url.replace(/\/+$/,'');S.model=$('#model').value;save();$('#save-status').textContent='设置已保存'});
 $('#api-key').value=S.api;$('#base-url').value=S.base;$('#model').value=S.model;
