@@ -331,7 +331,7 @@ const $=s=>document.querySelector(s),$$=s=>Array.from(document.querySelectorAll(
 const KEY='manageplan_read_v1';
 const defaults={api:'',base:'https://api.deepseek.com',model:'deepseek-flash',input:'',article:'',title:'我的英文文章',font:26,favorites:[],words:[],stats:{calls:0,prompt:0,completion:0,total:0}};
 function load(){try{return {...defaults,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){return {...defaults}}}
-let S=load(),current={id:'',title:S.title||'我的英文文章',content:S.article||''},pending='',focusFrame=0;
+let S=load(),current={id:'',title:S.title||'我的英文文章',content:S.article||''},pending='',pendingContext='',focusFrame=0;
 S.favorites=Array.isArray(S.favorites)?S.favorites:[];S.words=Array.isArray(S.words)?S.words:[];
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));return true}catch(e){return false}}
@@ -348,7 +348,7 @@ function sentences(p){
   const ch=src[i];if(ch!=='.'&&ch!=='!'&&ch!=='?')continue;
   if(ch==='.'&&/\d/.test(src[i-1]||'')&&/\d/.test(src[i+1]||''))continue;
   const token=src.slice(Math.max(start,src.lastIndexOf(' ',i-1)+1),i+1);
-  if(ch==='.'&&/^(?:Mr|Mrs|Ms|Dr|Prof|Sr|Jr|St|vs|etc|No|Fig|Inc|Ltd)\.$/i.test(token))continue;
+  if(ch==='.'&&/^(?:Mr|Mrs|Ms|Dr|Prof|Sr|Jr|St|vs|etc|No|Fig|Inc|Ltd|e\.g|i\.e|U\.S|U\.K)\.$/i.test(token))continue;
   let j=i+1;
   while(j<src.length&&/[.!?]/.test(src[j]))j++;
   while(j<src.length&&/["'”’»）)\]}】』」]/.test(src[j]))j++;
