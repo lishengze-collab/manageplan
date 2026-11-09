@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#e9eaed">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="阅读">
 <title>英文阅读</title>
@@ -195,6 +196,23 @@ textarea:focus,.field input:focus,.field select:focus{
   *,*::before,*::after{scroll-behavior:auto!important;transition:none!important}
 }
 
+
+/* Status-bar color continuity: keep the safe-area backdrop flat */
+html,body,#app{background:#e9eaed!important}
+body{background-color:#e9eaed!important;background-image:none!important}
+#app{background:#e9eaed!important}
+#app::before{
+  content:"";position:absolute;z-index:0;pointer-events:none;
+  top:calc(env(safe-area-inset-top) + 2px);right:0;bottom:0;left:0;
+  background:
+    radial-gradient(ellipse at 12% 7%,rgba(255,255,255,.96),transparent 38%),
+    radial-gradient(ellipse at 88% 20%,rgba(211,215,222,.72),transparent 34%),
+    radial-gradient(ellipse at 55% 100%,rgba(255,255,255,.78),transparent 42%),
+    linear-gradient(155deg,rgba(255,255,255,.34),rgba(242,243,245,.18) 48%,rgba(228,230,234,.24));
+}
+main{position:relative;z-index:1}
+.bottom-nav{position:relative;z-index:20}
+
 </style>
 </head>
 <body>
@@ -297,7 +315,9 @@ function showPopup(rect,v){pending=v;const p=$('#selection-popup');$('#pop-meani
 function selection(){setTimeout(()=>{const s=getSelection(),v=s?s.toString().trim():'';if(!v||v.length>80||!s.rangeCount||!$('#article-body').contains(s.getRangeAt(0).commonAncestorContainer)){hidePopup();return}showPopup(s.getRangeAt(0).getBoundingClientRect(),v)},30)}
 $('#article-body').addEventListener('mouseup',selection);$('#article-body').addEventListener('touchend',selection);document.addEventListener('selectionchange',()=>{if($('#panel-read').classList.contains('active'))selection()});$('#pop-close').addEventListener('click',hidePopup);$('#pop-copy').addEventListener('click',async()=>{const v=pending;if(!v)return;await copyText(v);$('#pop-copy').textContent='已复制';setTimeout(()=>$('#pop-copy').textContent='复制',1000)});document.addEventListener('pointerdown',e=>{if(!$('#selection-popup').contains(e.target)&&!$('#article-body').contains(e.target))hidePopup()});
 $('#pop-add').addEventListener('click',()=>{const v=pending.trim();if(v&&!S.words.some(w=>w.toLowerCase()===v.toLowerCase())){S.words.unshift(v);save();renderWords()}hidePopup()});
-async function copyText(text){try{await navigator.clipboard.writeText(text)}catch(e){const a=document.createElement('textarea');a.value=text;a.style.position='fixed';a.style.opacity='0';document.body.append(a);a.select();document.execCommand('copy');a.remove()}}\n$('#btn-copy-article').addEventListener('click',async()=>{const paragraphs=splitParagraphs(current.content||'');const formatted=[current.title||'英文文章',...paragraphs].join('\\n\\n');if(!paragraphs.length)return;await copyText(formatted);const b=$('#btn-copy-article');b.textContent='已复制';setTimeout(()=>b.textContent='复制格式',1200)});\n$('#pop-lookup').addEventListener('click',async()=>{if(!pending)return;const v=pending,m=$('#pop-meaning');m.hidden=false;m.textContent='查询中…';try{m.textContent=await ai([{role:'system',content:'You are a concise English-Chinese dictionary. Explain the given English word or phrase in Chinese. Include part of speech, pronunciation if useful, and the meaning in this sentence if context is available. Keep it concise.'},{role:'user',content:v}],{temperature:0,maxTokens:220})}catch(e){m.textContent=e.message}});
+async function copyText(text){try{await navigator.clipboard.writeText(text)}catch(e){const a=document.createElement('textarea');a.value=text;a.style.position='fixed';a.style.opacity='0';document.body.append(a);a.select();document.execCommand('copy');a.remove()}}
+$('#btn-copy-article').addEventListener('click',async()=>{const paragraphs=splitParagraphs(current.content||'');const formatted=[current.title||'英文文章',...paragraphs].join('\n\n');if(!paragraphs.length)return;await copyText(formatted);const b=$('#btn-copy-article');b.textContent='已复制';setTimeout(()=>b.textContent='复制格式',1200)});
+$('#pop-lookup').addEventListener('click',async()=>{if(!pending)return;const v=pending,m=$('#pop-meaning');m.hidden=false;m.textContent='查询中…';try{m.textContent=await ai([{role:'system',content:'You are a concise English-Chinese dictionary. Explain the given English word or phrase in Chinese. Include part of speech, pronunciation if useful, and the meaning in this sentence if context is available. Keep it concise.'},{role:'user',content:v}],{temperature:0,maxTokens:220})}catch(e){m.textContent=e.message}});
 $('#btn-speak').addEventListener('click',()=>{if(!current.content)return;if(!('speechSynthesis'in window)){showStatus('当前浏览器不支持朗读');return}speechSynthesis.cancel();const parts=splitParagraphs(current.content);parts.forEach((p,i)=>{const u=new SpeechSynthesisUtterance(p);u.lang='en-US';u.rate=.94;speechSynthesis.speak(u)});$('#btn-speak').classList.add('active')});
 $('#btn-stop').addEventListener('click',()=>{if('speechSynthesis'in window)speechSynthesis.cancel();$('#btn-speak').classList.remove('active')});
 $('#btn-save').addEventListener('click',()=>{const key=$('#api-key').value.trim(),url=$('#base-url').value.trim()||'https://api.deepseek.com';try{const u=new URL(url);if(!['http:','https:'].includes(u.protocol))throw Error()}catch(e){$('#save-status').textContent='接口地址无效';return}S.api=key;S.base=url.replace(/\/+$/,'');S.model=$('#model').value;save();$('#save-status').textContent='设置已保存'});
