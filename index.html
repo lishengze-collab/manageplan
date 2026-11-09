@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f4f4f4">
+<meta name="theme-color" content="#e9eaed">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="阅读">
 <title>英文阅读</title>
@@ -65,6 +65,136 @@ textarea:focus,input:focus{border-color:#999;box-shadow:0 0 0 3px rgba(0,0,0,.04
 .meaning{padding:9px 5px 3px;font-size:11px;line-height:1.6;color:#eee}.meaning[hidden]{display:none}
 @media(min-width:700px){.panel{padding:24px 30px 95px}.reader-toolbar{padding-left:30px;padding-right:30px}#reader-scroll{padding:30px 40px}.topbar{padding-left:30px;padding-right:30px}}
 @media(max-width:480px){.panel{padding:calc(13px + env(safe-area-inset-top)) 12px calc(86px + env(safe-area-inset-bottom))}.card{padding:13px;border-radius:14px}textarea{min-height:42vh;font-size:14px}.reader-toolbar{gap:5px;padding:8px 10px}.icon-btn{min-width:32px;height:33px;padding:0 7px}#reader-scroll{padding:17px 17px 30px}.article-body{line-height:1.82}.grid2{grid-template-columns:1fr}}
+
+/* Liquid glass visual layer */
+:root{
+  --bg:#eaebee;--soft:rgba(255,255,255,.56);--line:rgba(255,255,255,.78);
+  --ink:#25272b;--mid:#666a70;--muted:#92969d;--dark:#292c31;
+}
+html,body{background:#e9eaed}
+body{
+  background:
+    radial-gradient(ellipse at 12% 7%,rgba(255,255,255,.96),transparent 38%),
+    radial-gradient(ellipse at 88% 20%,rgba(211,215,222,.72),transparent 34%),
+    radial-gradient(ellipse at 55% 100%,rgba(255,255,255,.78),transparent 42%),
+    #e9eaed;
+}
+#app{
+  background:linear-gradient(155deg,rgba(255,255,255,.52),rgba(242,243,245,.44) 48%,rgba(228,230,234,.5));
+  isolation:isolate;
+}
+main{z-index:1}
+.panel{scrollbar-width:thin;scrollbar-color:rgba(90,94,101,.25) transparent}
+.card,.saved-item{
+  background:linear-gradient(145deg,rgba(255,255,255,.78),rgba(255,255,255,.48));
+  border:1px solid rgba(255,255,255,.88);
+  box-shadow:0 12px 32px rgba(38,42,49,.055),inset 0 1px 0 rgba(255,255,255,.92),inset 0 -1px 0 rgba(255,255,255,.24);
+  -webkit-backdrop-filter:blur(24px) saturate(170%);
+  backdrop-filter:blur(24px) saturate(170%);
+}
+.card{border-radius:22px;padding:18px}
+textarea,.field input,.field select{
+  background:rgba(255,255,255,.48);
+  border:1px solid rgba(255,255,255,.9);
+  box-shadow:inset 0 1px 3px rgba(38,42,49,.035),0 4px 14px rgba(38,42,49,.025);
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+}
+textarea{border-radius:17px}
+textarea:focus,.field input:focus,.field select:focus{
+  border-color:rgba(118,123,132,.48);
+  box-shadow:0 0 0 4px rgba(120,125,134,.09),inset 0 1px 3px rgba(38,42,49,.035);
+}
+.btn,.small-btn,.icon-btn{
+  background:rgba(255,255,255,.52);
+  border:1px solid rgba(255,255,255,.88);
+  box-shadow:0 4px 12px rgba(35,39,46,.045),inset 0 1px 0 rgba(255,255,255,.9);
+  -webkit-backdrop-filter:blur(16px) saturate(155%);
+  backdrop-filter:blur(16px) saturate(155%);
+  transition:transform .16s ease,background .16s ease,box-shadow .16s ease;
+}
+.btn{border-radius:14px}
+.btn.primary{
+  color:#fff;border-color:rgba(35,38,43,.72);
+  background:linear-gradient(145deg,rgba(68,72,79,.96),rgba(35,38,43,.96));
+  box-shadow:0 7px 18px rgba(35,38,43,.16),inset 0 1px 0 rgba(255,255,255,.22);
+}
+.icon-btn{border-radius:12px}
+.icon-btn.active,.small-btn:active,.btn:active{
+  background:rgba(218,221,226,.72);box-shadow:inset 0 1px 5px rgba(35,39,46,.08);
+}
+.reader-toolbar{
+  background:rgba(246,247,249,.62);
+  border-bottom:1px solid rgba(255,255,255,.8);
+  box-shadow:0 8px 22px rgba(38,42,49,.035);
+  -webkit-backdrop-filter:blur(28px) saturate(175%);
+  backdrop-filter:blur(28px) saturate(175%);
+}
+#reader-scroll{background:transparent}
+.reader-title{letter-spacing:-.025em}
+.article-body.has-focus .article-sentence:not(.is-focused){color:#92969c}
+.article-sentence.is-focused{
+  background:rgba(127,133,143,.17);
+  box-shadow:0 0 0 4px rgba(127,133,143,.17);
+  color:#202329;
+}
+.empty{
+  background:rgba(255,255,255,.38);
+  border:1px dashed rgba(150,154,162,.42);
+  border-radius:18px;
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+}
+.saved-item{border-radius:17px}
+.word-chip{
+  background:rgba(255,255,255,.58);
+  border:1px solid rgba(255,255,255,.86);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 3px 10px rgba(38,42,49,.035);
+}
+.stat{
+  background:rgba(255,255,255,.43);
+  border:1px solid rgba(255,255,255,.65);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.82);
+  border-radius:15px;
+}
+.bottom-nav{
+  margin:0 12px calc(8px + env(safe-area-inset-bottom));
+  padding:7px 8px;
+  border:1px solid rgba(255,255,255,.92);
+  border-radius:23px;
+  background:rgba(250,250,252,.62);
+  box-shadow:0 12px 34px rgba(39,43,50,.12),inset 0 1px 0 rgba(255,255,255,.96);
+  -webkit-backdrop-filter:blur(30px) saturate(185%);
+  backdrop-filter:blur(30px) saturate(185%);
+}
+.tab{height:43px;border-radius:16px;transition:background .18s ease,color .18s ease}
+.tab.active{
+  color:#23262b;
+  background:rgba(215,218,224,.42);
+  box-shadow:inset 0 1px 2px rgba(255,255,255,.85),0 2px 8px rgba(40,44,51,.045);
+}
+.selection-popup{
+  background:rgba(43,46,52,.78);
+  border:1px solid rgba(255,255,255,.22);
+  box-shadow:0 14px 38px rgba(20,22,26,.22),inset 0 1px 0 rgba(255,255,255,.18);
+  -webkit-backdrop-filter:blur(24px) saturate(150%);
+  backdrop-filter:blur(24px) saturate(150%);
+}
+.popup-actions button{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.12);border-radius:9px}
+@media(hover:hover){
+  .btn:not(:disabled):hover,.icon-btn:hover,.small-btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.78)}
+  .tab:not(.active):hover{background:rgba(255,255,255,.34);color:#555b63}
+}
+@media(max-width:480px){
+  .card{padding:15px;border-radius:20px}
+  .bottom-nav{margin-left:10px;margin-right:10px;border-radius:22px}
+}
+@supports not ((backdrop-filter:blur(2px)) or (-webkit-backdrop-filter:blur(2px))){
+  .card,.saved-item,.reader-toolbar,.bottom-nav,.selection-popup{background:rgba(255,255,255,.94)}
+  .selection-popup{background:rgba(43,46,52,.96)}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;transition:none!important}
+}
+
 </style>
 </head>
 <body>
