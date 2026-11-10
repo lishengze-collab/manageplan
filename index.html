@@ -383,22 +383,41 @@ function openArticle(t){
  requestAnimationFrame(()=>{scrollEl.scrollTop=S.pos*Math.max(0,scrollEl.scrollHeight-scrollEl.clientHeight);updateFocus()});
 }
 
-/* ---------- 专注高亮（取视口 43% 位置的句子） ---------- */
+/* ---------- 专注高亮：从首句跟随到末句 ---------- */
 let focusRaf=0,posT=0;
 function updateFocus(){
  focusRaf=0;
  if(!$('#panel-read').classList.contains('active'))return;
  const old=bodyEl.querySelector('.is-focused');
  if(!S.focus||TTS.on||!SENTS.length){if(old)old.classList.remove('is-focused');bodyEl.classList.remove('has-focus');return}
- const r=scrollEl.getBoundingClientRect(),y0=r.top+r.height*.43;
+ const maxScroll=Math.max(0,scrollEl.scrollHeight-scrollEl.clientHeight);
  let best=null;
- const ys=[0,-12,12,-24,24,-40,40,-64,64],xs=[.5,.3,.7,.15,.85];
- outer:for(const dy of ys)for(const fx of xs){
-  const el=document.elementFromPoint(r.left+r.width*fx,y0+dy);
-  const se=el&&el.closest?el.closest('.sent'):null;
-  if(se){best=se;break outer}
+ if(scrollEl.scrollTop<=2){
+  best=SENTS[0].el;
+ }else if(maxScroll>2&&scrollEl.scrollTop>=maxScroll-2){
+  best=SENTS[SENTS.length-1].el;
+ }else{
+  const r=scrollEl.getBoundingClientRect(),y0=r.top+r.height*.43;
+  const ys=[0,-12,12,-24,24,-40,40,-64,64],xs=[.5,.3,.7,.15,.85];
+  outer:for(const dy of ys)for(const fx of xs){
+   const el=document.elementFromPoint(r.left+r.width*fx,y0+dy);
+   const se=el&&el.closest?el.closest('.sent'):null;
+   if(se&&bodyEl.contains(se)){best=se;break outer}
+  }
+  if(!best){
+   let nearest=Infinity;
+   SENTS.forEach(item=>{
+    const box=item.el.getBoundingClientRect();
+    if(box.bottom<r.top||box.top>r.bottom)return;
+    const distance=y0<box.top?box.top-y0:y0>box.bottom?y0-box.bottom:0;
+    if(distance<nearest){nearest=distance;best=item.el}
+   });
+  }
  }
- if(best&&best!==old){if(old)old.classList.remove('is-focused');best.classList.add('is-focused');focusI=+best.dataset.i}
+ if(best!==old){
+  if(old)old.classList.remove('is-focused');
+  if(best){best.classList.add('is-focused');focusI=+best.dataset.i}
+ }
  bodyEl.classList.toggle('has-focus',!!best);
 }
 scrollEl.addEventListener('scroll',()=>{
