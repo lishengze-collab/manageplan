@@ -14,6 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Literata:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --paper:#f6f5f1;--ink:#25272b;--mute:#7d8087;--dim:#a8aaae;
@@ -22,6 +23,7 @@
   --sel:rgba(66,106,220,.16);--selline:#4a6fdc;--on:#25272b;--onfg:#fff;--bad:#b4453a;
   --font:26px;--st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
   --serif:"Literata","Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,"Songti SC",serif;
+  --reader-font:"Aptos","Source Sans 3","Segoe UI","Calibri","Helvetica Neue","Microsoft YaHei","PingFang SC",Arial,sans-serif;
   --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Helvetica Neue",Arial,sans-serif;
 }
 :root[data-theme=sepia]{--paper:#f1e8d2;--ink:#3a3326;--mute:#8a7f66;--dim:#b3a78c;--line:rgba(70,55,20,.12);--chip:rgba(70,55,20,.07);--card:rgba(255,250,235,.6);--glass:rgba(246,238,216,.85);--hl:#f7d98a;--speak:#f2c866;--on:#3a3326;--onfg:#f7efd9}
@@ -97,8 +99,8 @@ input[type=range]{width:100%;accent-color:var(--on);height:30px;margin:0}
 
 /* 阅读 */
 #reader-scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(var(--st) + 22px) 20px 48px}
-.article{max-width:720px;margin:0 auto;font-family:var(--serif);font-size:var(--font);line-height:1.78;letter-spacing:.006em;font-kerning:normal;hyphens:auto;-webkit-hyphens:auto;overflow-wrap:break-word;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
-.para{margin:0 0 .46em;text-align:left;text-justify:auto;text-align-last:auto}
+.article{max-width:720px;margin:0 auto;font-family:var(--reader-font);font-size:var(--font);line-height:1.78;letter-spacing:.006em;font-kerning:normal;hyphens:auto;-webkit-hyphens:auto;overflow-wrap:break-word;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.para{margin:0 0 .552em;text-align:left;text-justify:auto;text-align-last:auto}
 .sent{border-radius:5px;-webkit-box-decoration-break:clone;box-decoration-break:clone;transition:background .2s,color .2s}
 .article.focus-on.has-focus .sent:not(.is-focused):not(.speaking){color:var(--dim)}
 .focus-on .sent.is-focused{background:var(--hl);box-shadow:0 0 0 3px var(--hl)}
