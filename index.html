@@ -346,7 +346,8 @@ function applyTypography(){const root=document.documentElement;root.style.setPro
 
 /* ---------- 标签页 ---------- */
 function tab(n){
- $$('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===n));
+ if(n!=='read'&&$('#panel-read').classList.contains('active'))persistReadingProgress();
+ $('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===n));
  $$('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+n));
  if(n!=='read')closeSheet();
  closeModal();
@@ -412,8 +413,9 @@ function render(t){
 }
 function progressFor(id){const v=S.positions&&S.positions[id];if(typeof v==='number'&&Number.isFinite(v))return Math.max(0,Math.min(1,v));if(v&&typeof v.ratio==='number'&&Number.isFinite(v.ratio))return Math.max(0,Math.min(1,v.ratio));return id===S.posId?Math.max(0,Math.min(1,Number(S.pos)||0)):0;}
 function updateReadProgress(value){const max=Math.max(0,scrollEl.scrollHeight-scrollEl.clientHeight),ratio=value===undefined?(max>0?scrollEl.scrollTop/max:(SENTS.length?1:0)):value,p=Math.max(0,Math.min(1,ratio));$('#read-progress-fill').style.width=(p*100)+'%';$('#read-progress-text').textContent=Math.round(p*100)+'%';}
-function persistReadingProgress(){if(!current.id)return;const max=Math.max(0,scrollEl.scrollHeight-scrollEl.clientHeight),ratio=max>0?scrollEl.scrollTop/max:(SENTS.length?1:0);S.positions[current.id]={ratio:Math.max(0,Math.min(1,ratio)),updatedAt:Date.now()};S.pos=S.positions[current.id].ratio;S.posId=current.id;const fav=S.favorites.find(x=>x.id===current.id);if(fav)fav.progress=S.pos;save();updateReadProgress(S.pos);}
-function openArticle(t){stopSpeech();closeSheet();const id=hash(t),resume=progressFor(id);current={id:id,content:t};S.article=t;S.pos=resume;S.posId=id;save();render(t);updateFavBtn();tab('read');requestAnimationFrame(()=>{scrollEl.scrollTop=resume*Math.max(0,scrollEl.scrollHeight-scrollEl.clientHeight);updateReadProgress(resume);updateFocus();persistReadingProgress()});}
+function persistReadingProgress(){if(!current.id)return;const max=Math.max(0,scrollEl.scrollHeight-scrollEl.clientHeight),ratio=max>0?scrollEl.scrollTop/max:(SENTS.length?1:0),spoken=TTS.on&&TTS.units&&TTS.units[TTS.i]?TTS.units[TTS.i].si:null,anchor=Number.isInteger(spoken)?spoken:focusI;S.positions[current.id]={ratio:Math.max(0,Math.min(1,ratio)),sentence:anchor,updatedAt:Date.now()};S.pos=S.positions[current.id].ratio;S.posId=current.id;const fav=S.favorites.find(x=>x.id===current.id);if(fav)fav.progress=S.pos;save();updateReadProgress(S.pos);}
+function restoreReadPosition(id,fallback){const saved=S.positions&&S.positions[id],si=saved&&Number.isInteger(saved.sentence)?saved.sentence:-1;if(si>=0&&SENTS[si]){const sc=scrollEl.getBoundingClientRect(),r=SENTS[si].el.getBoundingClientRect(),target=sc.top+Math.min(sc.height*.34,240);scrollEl.scrollTop+=r.top-target;}else scrollEl.scrollTop=Math.max(0,Math.min(1,fallback||0))*Math.max(0,scrollEl.scrollHeight-scrollEl.clientHeight);updateFocus();updateReadProgress();persistReadingProgress();}
+function openArticle(t){stopSpeech();closeSheet();const id=hash(t),resume=progressFor(id);current={id:id,content:t};S.article=t;S.pos=resume;S.posId=id;save();render(t);updateFavBtn();tab('read');requestAnimationFrame(()=>restoreReadPosition(id,resume));}
 
 /* ---------- 专注高亮：从首句跟随到末句 ---------- */
 let focusRaf=0,posT=0,readProgressRaf=0;
@@ -455,7 +457,7 @@ function updateCount(){
 function updateResume(){const c=$('#resume-card');c.hidden=!S.article;if(S.article){const p=Math.round(progressFor(hash(S.article))*100);$('#resume-snip').textContent=S.article.replace(/\s+/g,' ').slice(0,100)+(S.article.length>100?'…':'')+' · 阅读进度 '+p+'%';}}
 rawEl.value=S.input||'';
 rawEl.addEventListener('input',()=>{S.input=rawEl.value;save();updateCount()});
-$('#btn-resume').addEventListener('click',()=>{if(!current.content)return;const p=progressFor(current.id);tab('read');requestAnimationFrame(()=>{scrollEl.scrollTop=p*Math.max(0,scrollEl.scrollHeight-scrollEl.clientHeight);updateReadProgress(p);updateFocus()})});
+$('#btn-resume').addEventListener('click',()=>{if(!current.content)return;const p=progressFor(current.id);tab('read');requestAnimationFrame(()=>restoreReadPosition(current.id,p))});
 $('#btn-read-direct').addEventListener('click',()=>{const t=rawEl.value.trim();if(!t){showStatus('请先粘贴内容','bad');return}showStatus('');openArticle(t)});
 $('#btn-clear').addEventListener('click',()=>{rawEl.value='';S.input='';save();updateCount();showStatus('')});
 $('#btn-paste').addEventListener('click',async()=>{
@@ -925,7 +927,7 @@ $('#btn-favorite').innerHTML=ICON.star;
 if(S.article){
  current={id:hash(S.article),content:S.article};S.pos=progressFor(current.id);S.posId=current.id;
  render(S.article);updateFavBtn();updateResume();
- tab('read');requestAnimationFrame(()=>{scrollEl.scrollTop=S.pos*Math.max(0,scrollEl.scrollHeight-scrollEl.clientHeight);updateReadProgress(S.pos);updateFocus()});
+ tab('read');requestAnimationFrame(()=>restoreReadPosition(current.id,S.pos));
 }else{render('');updateResume()}
 })();
 </script>
