@@ -362,6 +362,28 @@ function splitParagraphs(t){
  const raw=String(t||'').replace(/\r\n?/g,'\n').replace(/[\u2028\u2029]/g,'\n').trim();if(!raw)return [];
  return raw.split(/\n[\t ]*\n+/).map(block=>block.split(/\n+/).map(x=>x.replace(/[\t ]+/g,' ').trim()).filter(Boolean).join(' ')).filter(Boolean);
 }
+function sentences(p){
+ const src=String(p||'').replace(/\s+/g,' ').trim();if(!src)return [];
+ const out=[];let start=0;
+ const abbreviations=/^(?:e\.g\.|i\.e\.|U\.S\.|U\.K\.)/i;
+ const titleEnd=/(?:^|\s)(?:Mr|Mrs|Ms|Mx|Dr|Prof|Professor|Assoc|Asst|Sr|Jr|St|vs|etc|No|Fig|Inc|Ltd|Co|Corp|Dept|Univ|Mt|Ft|Ave|Blvd|Rd|Capt|Col|Gen|Lt|Maj|Rev|Hon|Gov|Sen|Rep|Amb|Supt|Sgt|Det|Adm|Cmdr|Fr|Dame|Lord|Lady|Messrs|Mmes|Ph)\.$/i;
+ for(let i=0;i<src.length;i++){
+  const ch=src[i];if(!/[.!?。！？…]/.test(ch))continue;
+  if(ch==='.'&&/\d/.test(src[i-1]||'')&&/\d/.test(src[i+1]||''))continue;
+  if(ch==='.'){
+   const tail=src.slice(Math.max(start,i-4));
+   if(abbreviations.test(tail))continue;
+   const prefix=src.slice(start,i+1);
+   if(titleEnd.test(prefix)||/(?:^|\s)[A-Z]\.$/.test(prefix))continue;
+  }
+  let j=i+1;while(j<src.length&&/[.!?。！？…]/.test(src[j]))j++;
+  while(j<src.length&&/["'”’»）)\]}】』」〕〉》]/.test(src[j]))j++;
+  const cjkEnd=/[。！？…]/.test(ch),next=src[j]||'';
+  const boundary=j>=src.length||/\s/.test(next)||cjkEnd||/[A-Z“‘（【「『]/.test(next);
+  if(boundary){const part=src.slice(start,j).trim();if(part)out.push(part);while(j<src.length&&/\s/.test(src[j]))j++;start=j;i=j-1}
+ }
+ const rest=src.slice(start).trim();if(rest)out.push(rest);return out;
+}
 function wordCount(t){return (String(t||'').match(/[A-Za-z]+(?:['’-][A-Za-z]+)*|[\u3400-\u9fff]+/g)||[]).length}
 function wrapHtml(s){
  let h='',last=0,m;const re=/[A-Za-z]+(?:['’-][A-Za-z]+)*|[\u3400-\u9fff]+/g;
