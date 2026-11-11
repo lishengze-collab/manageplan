@@ -29,9 +29,11 @@
   --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Helvetica Neue",Arial,sans-serif;
 }
 :root[data-theme=sepia]{--paper:#f1e8d2;--ink:#3a3326;--mute:#8a7f66;--dim:#b3a78c;--line:rgba(70,55,20,.12);--chip:rgba(70,55,20,.07);--card:rgba(255,250,235,.6);--glass:rgba(246,238,216,.85);--hl:#f7d98a;--speak:#f2c866;--on:#3a3326;--onfg:#f7efd9}
-:root[data-theme=dark]{--paper:#202226;--ink:#c6c8ce;--mute:#92959d;--dim:#777b84;--line:rgba(230,232,238,.10);--chip:rgba(230,232,238,.075);--card:rgba(245,246,250,.035);--glass:rgba(39,41,46,.94);--hl:rgba(211,181,112,.13);--speak:rgba(211,181,112,.23);--sel:rgba(128,157,226,.20);--selline:#9aafd9;--on:#34373e;--onfg:#d9dbe0;--bad:#d9857d}
+/* 深色：降低对比、偏暖灰蓝，避免纯白字在黑底上的刺眼感 */
+:root[data-theme=dark]{color-scheme:dark;--paper:#17191e;--ink:#c3c7cf;--mute:#8b919d;--dim:#646a76;--line:rgba(225,230,245,.12);--chip:rgba(225,230,245,.07);--card:rgba(225,230,245,.05);--glass:rgba(34,38,46,.72);--hl:rgba(201,170,105,.11);--speak:rgba(201,170,105,.20);--sel:rgba(128,157,226,.20);--selline:#8fa6d6;--on:#b4bccb;--onfg:#171a20;--bad:#d9857d}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:var(--paper);color:var(--ink);font-family:var(--sans);overflow:hidden;overscroll-behavior:none;-webkit-text-size-adjust:100%}
+:root[data-theme=dark] body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 body{position:fixed;inset:0}
 button,input,textarea,select{font:inherit;color:inherit}
 button{cursor:pointer;touch-action:manipulation;border:0;background:none;padding:0}
@@ -79,7 +81,7 @@ input[type=range]{width:100%;accent-color:var(--on);height:30px;margin:0}
 .swipe .acts{position:absolute;inset:0;display:flex;justify-content:space-between;align-items:stretch;padding:2px;overflow:hidden;border-radius:16px}
 .swipe .act{width:88px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;border-radius:13px;letter-spacing:.02em}
 .swipe .act.cat{background:#456fd0}.swipe .act.del{background:#c95049}
-.swipe .item{position:relative;touch-action:pan-y;transition:transform .22s cubic-bezier(.2,.8,.2,1);background:linear-gradient(var(--card),var(--card)),var(--paper);-webkit-user-select:none;user-select:none}
+.swipe .item{position:relative;touch-action:pan-y;transition:transform .22s cubic-bezier(.2,.8,.2,1);-webkit-user-select:none;user-select:none}
 .swipe .item .main{cursor:pointer}
 .tag{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:9px;background:var(--chip);color:var(--ink);font-size:11px;font-weight:600}
 .chips{display:flex;gap:7px;overflow-x:auto;margin:0 -16px 12px;padding:0 16px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
@@ -100,8 +102,12 @@ input[type=range]{width:100%;accent-color:var(--on);height:30px;margin:0}
 .cat-opt.on{background:var(--on);color:var(--onfg)}
 
 /* 阅读 */
-#reader-scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(var(--st) + 22px) 20px 48px}
-.article{max-width:720px;margin:0 auto;font-family:var(--reader-font);font-size:var(--font);line-height:var(--line-height);text-align:var(--read-align);letter-spacing:.006em;font-kerning:normal;hyphens:auto;-webkit-hyphens:auto;overflow-wrap:break-word;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+#reader-scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:18px 20px 48px;-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 14px);mask-image:linear-gradient(to bottom,transparent 0,#000 14px)}
+.article{max-width:720px;margin:0 auto;font-family:var(--reader-font);font-size:var(--font);line-height:var(--line-height);text-align:var(--read-align);letter-spacing:.006em;font-kerning:normal;
+  color:var(--read-ink,var(--ink));
+  hyphens:auto;-webkit-hyphens:auto;-webkit-hyphenate-limit-before:3;-webkit-hyphenate-limit-after:3;hyphenate-limit-chars:6 3 3;
+  word-break:normal;overflow-wrap:break-word;text-wrap:pretty;
+  user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .para{margin:0 0 var(--para-gap);text-align:inherit;text-justify:inter-word;text-align-last:auto}
 .sent{border-radius:5px;-webkit-box-decoration-break:clone;box-decoration-break:clone;transition:background .2s,color .2s}
 .article.focus-on.has-focus .sent:not(.is-focused):not(.speaking){color:var(--dim)}
@@ -139,8 +145,9 @@ input[type=range]{width:100%;accent-color:var(--on);height:30px;margin:0}
 /* 查词面板 */
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;max-width:900px;margin:0 auto;background:var(--glass);-webkit-backdrop-filter:blur(30px) saturate(180%);backdrop-filter:blur(30px) saturate(180%);border:1px solid var(--line);border-bottom:0;border-radius:26px 26px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.16);padding:8px 16px calc(var(--sb) + 12px);transform:translateY(110%);transition:transform .28s cubic-bezier(.2,.8,.2,1);pointer-events:none;max-height:62dvh;display:flex;flex-direction:column}
 .sheet.open{transform:none;pointer-events:auto}
-.grab{width:38px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 10px;flex:none}
-.sheet-head{display:flex;align-items:center;gap:8px;flex:none}
+.grab{position:relative;touch-action:none;width:38px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 10px;flex:none}
+.grab::before{content:"";position:absolute;left:-70px;right:-70px;top:-10px;bottom:-14px}
+.sheet-head{display:flex;align-items:center;gap:8px;flex:none;touch-action:none}
 .sheet-word{flex:1;min-width:0;font-family:var(--serif);font-size:25px;font-weight:700;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sheet-ext{display:flex;gap:6px;margin:8px 0 0;flex:none}
 .sheet-ext button{height:30px;padding:0 11px;border-radius:15px;background:var(--chip);font-size:12.5px;font-weight:600;color:var(--mute)}
@@ -154,7 +161,7 @@ input[type=range]{width:100%;accent-color:var(--on);height:30px;margin:0}
 .sheet-actions .btn.done{color:#2e8b57}
 .toast{position:fixed;left:50%;top:calc(var(--st) + 14px);transform:translate(-50%,-30px);opacity:0;z-index:90;background:var(--on);color:var(--onfg);padding:10px 16px;border-radius:20px;font-size:14px;font-weight:600;max-width:88vw;transition:all .25s;pointer-events:none}
 .toast.show{transform:translate(-50%,0);opacity:1}
-.read-progress{height:22px;flex:none;display:flex;align-items:center;gap:10px;padding:3px clamp(18px,4vw,32px) 2px;color:var(--mute);font-size:10px;font-variant-numeric:tabular-nums}
+.read-progress{position:relative;z-index:9;flex:none;display:flex;align-items:center;gap:10px;padding:calc(var(--st) + 8px) clamp(18px,4vw,32px) 4px;color:var(--mute);font-size:10px;font-variant-numeric:tabular-nums}
 .read-progress .track{height:3px;flex:1;border-radius:8px;background:var(--chip);overflow:hidden}
 .read-progress .fill{height:100%;width:0;border-radius:inherit;background:var(--selline);transition:width .08s linear}
 .word-modal{position:fixed;z-index:72;left:50%;top:50%;width:min(560px,calc(100vw - 28px));max-height:min(78dvh,760px);display:flex;flex-direction:column;overflow:hidden;padding:18px;background:var(--paper);border:1px solid var(--line);border-radius:24px;box-shadow:0 20px 70px rgba(0,0,0,.28);opacity:0;pointer-events:none;transform:translate(-50%,-46%) scale(.97);transition:opacity .2s,transform .22s}
@@ -180,155 +187,157 @@ input[type=range]{width:100%;accent-color:var(--on);height:30px;margin:0}
 @media(min-width:1600px){.page{max-width:1280px}.article{max-width:1040px}.read-progress{padding-left:clamp(60px,7vw,120px);padding-right:clamp(60px,7vw,120px)}.word-modal{width:min(620px,calc(100vw - 40px))}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 
-/* ---------- Liquid Glass 视觉层：只覆盖表面样式，不改变布局与交互 ---------- */
+/* =====================================================
+   Liquid Glass 视觉层
+   用变量统一三种主题；只改表面质感，不改布局与交互
+   ===================================================== */
 :root{
-  --line:rgba(85,96,120,.16);
-  --chip:rgba(255,255,255,.42);
-  --card:rgba(255,255,255,.48);
-  --glass:rgba(255,255,255,.58);
+  --line:rgba(80,92,118,.15);--chip:rgba(255,255,255,.40);--card:rgba(255,255,255,.46);--glass:rgba(255,255,255,.58);
+  --glass-fill:linear-gradient(145deg,rgba(255,255,255,.68),rgba(255,255,255,.28));
+  --glass-strong:linear-gradient(145deg,rgba(255,255,255,.88),rgba(249,250,255,.64));
+  --nav-fill:linear-gradient(145deg,rgba(255,255,255,.82),rgba(255,255,255,.42));
+  --field-fill:linear-gradient(145deg,rgba(255,255,255,.72),rgba(255,255,255,.40));
+  --seg-on:linear-gradient(145deg,rgba(255,255,255,.96),rgba(255,255,255,.64));
+  --pri-bg:linear-gradient(145deg,#4a5260,#272d38);--pri-fg:#fff;
+  --hi:rgba(255,255,255,.90);--rim:rgba(255,255,255,.60);--lo:rgba(90,104,135,.10);--sheen:rgba(255,255,255,.14);
+  --sh-s:0 6px 20px rgba(42,55,82,.07);--sh-m:0 10px 30px rgba(42,55,82,.11);--sh-l:0 22px 64px rgba(35,48,75,.22);
+  --orb1:rgba(132,166,236,.34);--orb2:rgba(194,166,232,.28);
+  --mask:rgba(25,31,43,.28);--blur:blur(24px) saturate(185%);--blur-l:blur(36px) saturate(200%);
+  --knob:#fff;--green:#34c759;
 }
 :root[data-theme=sepia]{
-  --line:rgba(112,91,54,.16);
-  --chip:rgba(255,251,238,.42);
-  --card:rgba(255,250,235,.48);
-  --glass:rgba(250,244,226,.64);
+  --line:rgba(112,91,54,.17);--chip:rgba(255,251,238,.44);--card:rgba(255,250,235,.50);--glass:rgba(250,244,226,.64);
+  --glass-fill:linear-gradient(145deg,rgba(255,252,240,.72),rgba(246,237,214,.34));
+  --glass-strong:linear-gradient(145deg,rgba(255,252,242,.90),rgba(247,240,220,.70));
+  --nav-fill:linear-gradient(145deg,rgba(255,252,240,.86),rgba(246,237,214,.58));
+  --field-fill:linear-gradient(145deg,rgba(255,252,242,.74),rgba(246,237,214,.42));
+  --seg-on:linear-gradient(145deg,rgba(255,253,244,.97),rgba(250,243,224,.70));
+  --pri-bg:linear-gradient(145deg,#5f5441,#3a3326);--pri-fg:#f7efd9;
+  --hi:rgba(255,253,244,.85);--rim:rgba(255,250,232,.60);--lo:rgba(112,91,54,.10);--sheen:rgba(255,252,238,.36);
+  --sh-s:0 6px 20px rgba(84,65,31,.08);--sh-m:0 10px 30px rgba(84,65,31,.11);--sh-l:0 22px 64px rgba(84,65,31,.22);
+  --orb1:rgba(232,190,120,.34);--orb2:rgba(214,160,130,.26);
+  --mask:rgba(50,40,20,.28);
 }
 :root[data-theme=dark]{
-  --paper:#1c1f25;--ink:#e0e3ea;--mute:#a0a6b2;--dim:#777f8e;
-  --line:rgba(235,240,255,.15);--chip:rgba(235,240,255,.075);
-  --card:rgba(235,240,255,.065);--glass:rgba(43,48,58,.68);
-  --on:#e4e8f0;--onfg:#20232a;
+  --line:rgba(225,230,245,.12);--chip:rgba(225,230,245,.07);--card:rgba(225,230,245,.05);--glass:rgba(34,38,46,.72);
+  --glass-fill:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.05));
+  --glass-strong:linear-gradient(145deg,rgba(52,57,68,.94),rgba(30,34,41,.95));
+  --nav-fill:linear-gradient(145deg,rgba(58,64,77,.78),rgba(30,34,42,.74));
+  --field-fill:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.04));
+  --seg-on:linear-gradient(145deg,rgba(255,255,255,.17),rgba(255,255,255,.07));
+  --pri-bg:linear-gradient(145deg,#b6bfce,#919bad);--pri-fg:#171a20;
+  --hi:rgba(255,255,255,.10);--rim:rgba(255,255,255,.08);--lo:rgba(0,0,0,.28);--sheen:rgba(255,255,255,.02);
+  --sh-s:0 6px 20px rgba(0,0,0,.22);--sh-m:0 10px 30px rgba(0,0,0,.30);--sh-l:0 22px 64px rgba(0,0,0,.50);
+  --orb1:rgba(80,112,180,.22);--orb2:rgba(122,96,168,.18);
+  --mask:rgba(0,0,0,.50);
+  --knob:#d6dae2;--green:#3b9f60;
+  --read-ink:#b9bec8;
 }
-#app{
-  background:
-    radial-gradient(ellipse at 8% 4%,rgba(153,180,230,.12),transparent 38%),
-    radial-gradient(ellipse at 92% 88%,rgba(190,169,220,.10),transparent 42%),
-    var(--paper);
-}
-:root[data-theme=dark] #app{
-  background:
-    radial-gradient(ellipse at 8% 4%,rgba(104,135,190,.15),transparent 42%),
-    radial-gradient(ellipse at 94% 88%,rgba(133,113,174,.12),transparent 44%),
-    var(--paper);
-}
-.card,.item,.msheet,.word-modal,.sheet{
+/* 背景光斑：给毛玻璃提供可折射的色彩 */
+main{z-index:1}
+/* 已移除彩色光斑：它们会透过半透明表面，看起来像底部漏光 */
+
+/* 卡片 */
+.card,.item,.stat{
   border:1px solid var(--line);
-  -webkit-backdrop-filter:blur(26px) saturate(180%);
-  backdrop-filter:blur(26px) saturate(180%);
+  -webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);
 }
 .card{
-  position:relative;
-  overflow:hidden;
-  background:linear-gradient(145deg,rgba(255,255,255,.66),rgba(255,255,255,.32));
-  box-shadow:0 8px 26px rgba(42,55,82,.055),inset 0 1px 0 rgba(255,255,255,.72);
+  position:relative;overflow:hidden;background:var(--glass-fill);
+  box-shadow:var(--sh-s),inset 0 1px 0 var(--hi),inset 0 0 0 1px var(--rim),inset 0 -1px 0 var(--lo);
 }
-.card::before{
-  content:"";position:absolute;inset:0 0 auto;height:42%;
-  background:linear-gradient(115deg,rgba(255,255,255,.30),transparent 65%);
-  pointer-events:none;z-index:0;
-}
+.card::before{content:"";position:absolute;inset:0 0 auto;height:46%;background:linear-gradient(115deg,var(--sheen),transparent 62%);pointer-events:none;z-index:0}
 .card>*{position:relative;z-index:1}
-:root[data-theme=sepia] .card{
-  background:linear-gradient(145deg,rgba(255,252,240,.68),rgba(246,237,214,.34));
-  box-shadow:0 8px 24px rgba(84,65,31,.07),inset 0 1px 0 rgba(255,255,255,.58);
-}
-:root[data-theme=dark] .card{
-  background:linear-gradient(145deg,rgba(255,255,255,.095),rgba(255,255,255,.035));
-  box-shadow:0 10px 30px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.12);
-}
-.item{
-  background:linear-gradient(145deg,rgba(255,255,255,.58),rgba(255,255,255,.30));
-  box-shadow:0 5px 18px rgba(42,55,82,.045),inset 0 1px 0 rgba(255,255,255,.68);
-}
-:root[data-theme=sepia] .item{background:linear-gradient(145deg,rgba(255,252,240,.64),rgba(246,237,214,.34))}
-:root[data-theme=dark] .item{background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.025));box-shadow:0 6px 20px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.10)}
+.item{background:var(--glass-fill);box-shadow:var(--sh-s),inset 0 1px 0 var(--hi),inset 0 -1px 0 var(--lo)}
+.stat{background:var(--field-fill);box-shadow:inset 0 1px 0 var(--hi)}
+/* 滑动行的前景必须不透明，否则会透出底下的「分类 / 删除」 */
+.swipe>.item{background:var(--glass-fill),var(--paper);-webkit-backdrop-filter:none;backdrop-filter:none}
+.swipe{box-shadow:var(--sh-s)}
+
+/* 按钮 / 小控件 */
 .btn,.dk,.ibtn,.chip,.cat-opt,.sheet-ext button{
   border:1px solid var(--line);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.48),0 3px 10px rgba(45,57,80,.045);
-  -webkit-backdrop-filter:blur(16px) saturate(165%);
-  backdrop-filter:blur(16px) saturate(165%);
+  box-shadow:inset 0 1px 0 var(--hi),0 3px 10px rgba(45,57,80,.05);
+  -webkit-backdrop-filter:blur(16px) saturate(165%);backdrop-filter:blur(16px) saturate(165%);
+  transition:transform .15s,opacity .15s,background .2s;
 }
-.btn{background:linear-gradient(145deg,rgba(255,255,255,.68),rgba(255,255,255,.34))}
-.btn.primary{background:linear-gradient(145deg,#414957,#272d38);color:#fff;border-color:rgba(255,255,255,.24);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 7px 18px rgba(40,50,70,.18)}
-:root[data-theme=sepia] .btn{background:linear-gradient(145deg,rgba(255,252,240,.7),rgba(246,237,214,.4))}
-:root[data-theme=sepia] .btn.primary{background:linear-gradient(145deg,#5a503e,#3a3326);color:#f7efd9}
-:root[data-theme=dark] .btn{background:linear-gradient(145deg,rgba(255,255,255,.12),rgba(255,255,255,.045));color:var(--ink)}
-:root[data-theme=dark] .btn.primary{background:linear-gradient(145deg,#e4e8f0,#aeb8ca);color:#20232a}
-.btn:active,.dk:active,.ibtn:active,.chip:active,.cat-opt:active{transform:scale(.975);opacity:.88}
+.btn,.dk,.ibtn,.chip,.cat-opt,.sheet-ext button{background:var(--glass-fill)}
+.btn.primary,.dk.play,.chip.on,.cat-opt.on{background:var(--pri-bg);color:var(--pri-fg);border-color:rgba(255,255,255,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.24),0 7px 18px rgba(30,40,60,.20)}
+:root[data-theme=dark] .btn.primary,:root[data-theme=dark] .dk.play,:root[data-theme=dark] .chip.on,:root[data-theme=dark] .cat-opt.on{box-shadow:inset 0 1px 0 rgba(255,255,255,.30),0 6px 16px rgba(0,0,0,.32)}
+.btn:active,.dk:active,.ibtn:active,.chip:active,.cat-opt:active{transform:scale(.97);opacity:.88}
+.sheet-actions .btn.done{color:#2e8b57}
+:root[data-theme=dark] .sheet-actions .btn.done{color:#6cc08d}
+.dk.fav.on{color:#c9962b}
+.tag{border:1px solid var(--line)}
+
+/* 输入框：内凹玻璃 */
 textarea,input[type=text],input[type=password],input[type=search],select{
-  background:linear-gradient(145deg,rgba(255,255,255,.68),rgba(255,255,255,.38));
-  border-color:rgba(105,120,150,.18);
-  box-shadow:inset 0 2px 7px rgba(45,57,80,.045),inset 0 1px 0 rgba(255,255,255,.7);
-  -webkit-backdrop-filter:blur(16px) saturate(160%);
-  backdrop-filter:blur(16px) saturate(160%);
+  background:var(--field-fill);border-color:var(--line);
+  box-shadow:inset 0 2px 7px rgba(45,57,80,.05),inset 0 1px 0 var(--hi);
+  -webkit-backdrop-filter:blur(16px) saturate(160%);backdrop-filter:blur(16px) saturate(160%);
 }
-:root[data-theme=dark] textarea,:root[data-theme=dark] input[type=text],:root[data-theme=dark] input[type=password],:root[data-theme=dark] input[type=search],:root[data-theme=dark] select{
-  background:linear-gradient(145deg,rgba(255,255,255,.085),rgba(255,255,255,.035));
-  border-color:rgba(235,240,255,.14);
-  box-shadow:inset 0 2px 8px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.08);
-}
-textarea:focus,input:focus,select:focus{border-color:rgba(91,125,190,.55);box-shadow:0 0 0 3px rgba(91,125,190,.12),inset 0 1px 0 rgba(255,255,255,.55)}
-.seg{
-  background:rgba(120,132,155,.10);
-  border:1px solid var(--line);
-  box-shadow:inset 0 1px 3px rgba(35,45,65,.07),inset 0 1px 0 rgba(255,255,255,.35);
-  -webkit-backdrop-filter:blur(18px) saturate(160%);
-  backdrop-filter:blur(18px) saturate(160%);
-}
-.seg button.on{
-  background:linear-gradient(145deg,rgba(255,255,255,.92),rgba(255,255,255,.58));
-  border:1px solid rgba(255,255,255,.8);
-  box-shadow:0 3px 10px rgba(44,55,78,.10),inset 0 1px 0 #fff;
-}
-:root[data-theme=dark] .seg button.on{
-  background:linear-gradient(145deg,rgba(255,255,255,.19),rgba(255,255,255,.09));
-  border-color:rgba(255,255,255,.17);
-  box-shadow:0 3px 10px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.16);
-}
+:root[data-theme=dark] textarea,:root[data-theme=dark] input[type=text],:root[data-theme=dark] input[type=password],:root[data-theme=dark] input[type=search],:root[data-theme=dark] select{box-shadow:inset 0 2px 8px rgba(0,0,0,.20),inset 0 1px 0 var(--hi)}
+textarea:focus,input:focus,select:focus{border-color:rgba(91,125,190,.55);box-shadow:0 0 0 3px rgba(91,125,190,.14),inset 0 1px 0 var(--hi)}
+
+/* 分段控件 / 开关 */
+.seg{background:rgba(120,132,155,.10);border:1px solid var(--line);box-shadow:inset 0 1px 3px rgba(35,45,65,.07),inset 0 1px 0 var(--hi);-webkit-backdrop-filter:blur(18px) saturate(160%);backdrop-filter:blur(18px) saturate(160%)}
+.seg button.on{background:var(--seg-on);color:var(--ink);border:1px solid var(--rim);box-shadow:0 3px 10px rgba(44,55,78,.10),inset 0 1px 0 var(--hi)}
+.switch i{background:rgba(120,132,155,.20);box-shadow:inset 0 1px 3px rgba(0,0,0,.10)}
+.switch i::after{background:var(--knob);box-shadow:0 1px 4px rgba(0,0,0,.25),0 0 0 .5px rgba(0,0,0,.06)}
+.switch input:checked+i{background:var(--green);border-color:var(--green)}
+
+/* 底部导航 */
 .nav{
-  background:linear-gradient(145deg,rgba(255,255,255,.78),rgba(255,255,255,.40));
-  border:1px solid rgba(255,255,255,.72);
-  box-shadow:0 12px 34px rgba(40,52,78,.14),inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(115,130,160,.08);
-  -webkit-backdrop-filter:blur(34px) saturate(210%);
-  backdrop-filter:blur(34px) saturate(210%);
+  background:var(--nav-fill);border:1px solid var(--rim);
+  box-shadow:var(--sh-m),inset 0 1px 0 var(--hi),inset 0 -1px 0 var(--lo);
+  -webkit-backdrop-filter:blur(34px) saturate(210%);backdrop-filter:blur(34px) saturate(210%);
 }
-:root[data-theme=sepia] .nav{background:linear-gradient(145deg,rgba(255,252,240,.84),rgba(246,237,214,.58));border-color:rgba(255,255,255,.62)}
-:root[data-theme=dark] .nav{
-  background:linear-gradient(145deg,rgba(75,82,96,.78),rgba(39,44,53,.72));
-  border-color:rgba(255,255,255,.14);
-  box-shadow:0 12px 34px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.16),inset 0 -1px 0 rgba(0,0,0,.12);
-}
-.tab.active{
-  background:linear-gradient(145deg,rgba(255,255,255,.82),rgba(255,255,255,.40));
-  border:1px solid rgba(255,255,255,.72);
-  box-shadow:0 3px 12px rgba(42,55,82,.10),inset 0 1px 0 rgba(255,255,255,.9);
-}
-:root[data-theme=dark] .tab.active{background:linear-gradient(145deg,rgba(255,255,255,.16),rgba(255,255,255,.055));border-color:rgba(255,255,255,.13);box-shadow:0 3px 12px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.13)}
-.dock{
-  position:relative;
-}
-.dk{background:linear-gradient(145deg,rgba(255,255,255,.72),rgba(255,255,255,.30))}
-.dk.play{background:linear-gradient(145deg,#414957,#272d38);color:#fff;border-color:rgba(255,255,255,.25)}
-:root[data-theme=dark] .dk{background:linear-gradient(145deg,rgba(255,255,255,.13),rgba(255,255,255,.04))}
-:root[data-theme=dark] .dk.play{background:linear-gradient(145deg,#e4e8f0,#aeb8ca);color:#20232a}
+.tab.active{background:var(--seg-on);border:1px solid var(--rim);box-shadow:0 3px 12px rgba(42,55,82,.10),inset 0 1px 0 var(--hi)}
+
+/* 弹层 */
 .sheet,.msheet,.word-modal{
-  background:linear-gradient(145deg,rgba(255,255,255,.82),rgba(247,249,253,.68));
-  border-color:rgba(255,255,255,.78);
-  box-shadow:0 20px 60px rgba(35,48,75,.20),inset 0 1px 0 rgba(255,255,255,.9);
+  background:var(--glass-strong);border-color:var(--rim);
+  box-shadow:var(--sh-l),inset 0 1px 0 var(--hi);
+  -webkit-backdrop-filter:var(--blur-l);backdrop-filter:var(--blur-l);
 }
-:root[data-theme=dark] .sheet,:root[data-theme=dark] .msheet,:root[data-theme=dark] .word-modal{
-  background:linear-gradient(145deg,rgba(57,63,75,.94),rgba(34,38,46,.94));
-  border-color:rgba(255,255,255,.15);
-  box-shadow:0 20px 60px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.12);
-}
-.mask{background:rgba(25,31,43,.28);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px)}
-:root[data-theme=dark] .mask{background:rgba(0,0,0,.42)}
-.chip,.cat-opt,.sheet-ext button{background:linear-gradient(145deg,rgba(255,255,255,.60),rgba(255,255,255,.28))}
-:root[data-theme=dark] .chip,:root[data-theme=dark] .cat-opt,:root[data-theme=dark] .sheet-ext button{background:linear-gradient(145deg,rgba(255,255,255,.11),rgba(255,255,255,.035))}
+.grab{background:rgba(120,132,155,.35)}
+.mask{background:var(--mask);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px)}
+.word-modal-context{background:var(--field-fill);border:1px solid var(--line)}
+.toast{-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:var(--sh-m)}
+
+/* 关闭按钮（所有弹窗统一） */
+.xbtn{flex:none;width:34px;height:34px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:var(--mute);background:var(--glass-fill);border:1px solid var(--line);box-shadow:inset 0 1px 0 var(--hi),0 3px 10px rgba(45,57,80,.08);-webkit-backdrop-filter:blur(16px) saturate(165%);backdrop-filter:blur(16px) saturate(165%);transition:transform .15s,color .15s,background .2s}
+.xbtn svg{width:14px;height:14px}
+.xbtn:hover{color:var(--ink)}
+.xbtn:active{transform:scale(.88)}
+
+/* 生词卡：红色单词 / 音节 / 音标 / 英文释义 / 中文释义 / 例句 */
+:root{--wred:#d23f31}
+:root[data-theme=sepia]{--wred:#bf3a2b}
+:root[data-theme=dark]{--wred:#e3887f}
+.word-modal-word{margin:10px 0 2px;font-size:34px;color:var(--wred);letter-spacing:.01em}
+.word-modal-sub{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;min-height:22px;margin-bottom:6px}
+.wi-syl{font-family:var(--serif);font-size:16px;font-weight:600;letter-spacing:.06em;color:var(--ink)}
+.wi-ipa{font-family:"Segoe UI","Noto Sans","Arial Unicode MS",var(--sans);font-size:15px;color:var(--mute)}
+.word-modal-detail{white-space:normal;margin-top:8px;padding-right:2px}
+.word-modal-detail.load{white-space:pre-wrap}
+.wi-sec{padding:12px 0;border-top:1px solid var(--line)}
+.wi-sec:first-child{border-top:0;padding-top:4px}
+.wi-sec h4{margin:0 0 6px;font-size:11.5px;font-weight:700;letter-spacing:.08em;color:var(--mute)}
+.wi-sec p{margin:0;font-size:15.5px;line-height:1.7}
+.wi-pos{display:inline-block;margin-right:8px;padding:1px 8px;border-radius:9px;background:var(--chip);border:1px solid var(--line);font-style:normal;font-size:12px;font-weight:600;color:var(--mute);vertical-align:1px}
+.wi-ex{margin:0;padding:0;list-style:none;counter-reset:ex;display:grid;gap:12px}
+.wi-ex li{counter-increment:ex;position:relative;padding-left:28px}
+.wi-ex li::before{content:counter(ex);position:absolute;left:0;top:3px;width:19px;height:19px;border-radius:50%;background:var(--chip);border:1px solid var(--line);font-size:11px;font-weight:700;color:var(--mute);display:flex;align-items:center;justify-content:center}
+.wi-en{font-family:var(--serif);font-size:15px;line-height:1.6}
+.wi-zh{margin-top:2px;font-size:13.5px;line-height:1.6;color:var(--mute)}
+.wi-note{margin:10px 0 0;font-size:12px;color:var(--mute)}
+.word-modal-context{flex:none;margin-top:10px;padding:8px 10px;font-size:12px;line-height:1.5;max-height:64px}
+
+/* 不支持 backdrop-filter 时回退为实色 */
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
   .card,.item,.nav,.sheet,.msheet,.word-modal{background:var(--paper)}
 }
-
 </style>
 </head>
 <body>
@@ -355,7 +364,7 @@ textarea:focus,input:focus,select:focus{border-color:rgba(91,125,190,.55);box-sh
  <!-- 阅读 -->
  <section class="panel" id="panel-read">
   <div class="read-progress"><span id="read-progress-text">0%</span><span class="track"><i class="fill" id="read-progress-fill"></i></span></div>
-  <div id="reader-scroll"><article class="article focus-on" id="article-body"></article></div>
+  <div id="reader-scroll"><article class="article focus-on" id="article-body" lang="en"></article></div>
   <div class="dock off" id="dock">
    <button class="dk fav" id="btn-favorite" aria-label="收藏文章"></button>
    <button class="dk txt" id="btn-font-dec" aria-label="减小字号">A−</button>
@@ -428,7 +437,7 @@ textarea:focus,input:focus,select:focus{border-color:rgba(91,125,190,.55);box-sh
  <div class="sheet-head">
   <div class="sheet-word" id="sheet-word"></div>
   <button class="ibtn" id="sh-speak" aria-label="发音"><svg viewBox="0 0 24 24"><path d="M4 9.5v5h4l5 4v-13l-5 4z" fill="currentColor"/><path d="M16 8.500a5 5 0 0 1 0 7M18.500 6a8.500 8.500 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
-  <button class="ibtn" id="sh-close" aria-label="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <button class="xbtn" id="sh-close" aria-label="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
  </div>
  <div class="sheet-ext"><button id="sh-prev">＋ 前一词</button><button id="sh-next">后一词 ＋</button></div>
  <div class="sheet-scroll"><div class="sheet-body" id="sheet-body"></div><div class="sheet-trans" id="sheet-trans" hidden></div></div>
@@ -449,10 +458,10 @@ textarea:focus,input:focus,select:focus{border-color:rgba(91,125,190,.55);box-sh
  <div class="row" style="margin-top:6px"><button class="btn block" id="bulk-cancel">取消</button><button class="btn primary block" id="bulk-ok">添加</button></div>
 </div>
 <div class="word-modal" id="word-modal" role="dialog" aria-modal="true" aria-label="生词详细释义">
- <div class="word-modal-head"><span id="word-card-count">1 / 1</span><button class="ibtn" id="word-card-close" aria-label="关闭">×</button></div>
+ <div class="word-modal-head"><span id="word-card-count">1 / 1</span><button class="xbtn" id="word-card-close" aria-label="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
  <div class="word-modal-controls"><button class="btn" id="word-card-prev">← 上一个</button><button class="btn" id="word-card-next">下一个 →</button></div>
- <div class="word-modal-word" id="word-card-word"></div><div class="word-modal-context" id="word-card-context">原文语境</div>
- <div class="word-modal-detail load" id="word-card-detail">正在加载详细释义…</div><div class="word-modal-hint">左右滑动切换生词卡片</div>
+ <div class="word-modal-word" id="word-card-word"></div><div class="word-modal-sub" id="word-card-sub"></div>
+ <div class="word-modal-detail load" id="word-card-detail">正在加载详细释义…</div><div class="word-modal-context" id="word-card-context" hidden></div><div class="word-modal-hint">左右滑动切换生词卡片</div>
 </div>
  <div class="toast" id="toast" role="status"></div>
 </div>
@@ -482,7 +491,7 @@ const ICON={
 };
 
 /* ---------- 主题 / 状态栏颜色 ---------- */
-const PAPER={light:'#f6f5f1',sepia:'#f1e8d2',dark:'#131417'};
+const PAPER={light:'#f6f5f1',sepia:'#f1e8d2',dark:'#17191e'};
 const mq=window.matchMedia?matchMedia('(prefers-color-scheme:dark)'):null;
 function applyTheme(){
  let t=S.theme;if(t==='auto')t=mq&&mq.matches?'dark':'light';
@@ -496,7 +505,7 @@ function applyTypography(){const root=document.documentElement;root.style.setPro
 
 /* ---------- 标签页 ---------- */
 function tab(n){
- if(n!=='read'&&$('#panel-read').classList.contains('active'))persistReadingProgress();
+ if(n!=='read'&&$('#panel-read').classList.contains('active')){persistReadingProgress();clearTimeout(posT)}
  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===n));
  $$('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+n));
  if(n!=='read')closeSheet();
@@ -516,16 +525,18 @@ function splitParagraphs(t){
 function sentences(p){
  const src=String(p||'').replace(/\s+/g,' ').trim();if(!src)return [];
  const out=[];let start=0;
- const abbreviations=/^(?:e\.g\.|i\.e\.|U\.S\.|U\.K\.)/i;
  const titleEnd=/(?:^|\s)(?:Mr|Mrs|Ms|Mx|Dr|Prof|Professor|Assoc|Asst|Sr|Jr|St|vs|etc|No|Fig|Inc|Ltd|Co|Corp|Dept|Univ|Mt|Ft|Ave|Blvd|Rd|Capt|Col|Gen|Lt|Maj|Rev|Hon|Gov|Sen|Rep|Amb|Supt|Sgt|Det|Adm|Cmdr|Fr|Dame|Lord|Lady|Messrs|Mmes|Ph)\.$/i;
  for(let i=0;i<src.length;i++){
   const ch=src[i];if(!/[.!?。！？…]/.test(ch))continue;
   if(ch==='.'&&/\d/.test(src[i-1]||'')&&/\d/.test(src[i+1]||''))continue;
   if(ch==='.'){
-   const tail=src.slice(Math.max(start,i-4));
-   if(abbreviations.test(tail))continue;
    const prefix=src.slice(start,i+1);
    if(titleEnd.test(prefix)||/(?:^|\s)[A-Z]\.$/.test(prefix))continue;
+   const abbr=prefix.match(/(?:^|[\s(])(e\.g|i\.e|U\.S|U\.K|a\.m|p\.m)\.$/i);
+   if(abbr){
+    if(/^(?:e\.g|i\.e)$/i.test(abbr[1]))continue;
+    if(/^\s*[a-z0-9]/.test(src.slice(i+1)))continue;
+   }
   }
   let j=i+1;while(j<src.length&&/[.!?。！？…]/.test(src[j]))j++;
   while(j<src.length&&/["'”’»）)\]}】』」〕〉》]/.test(src[j]))j++;
@@ -546,30 +557,48 @@ function wrapHtml(s){
 let current={id:'',content:S.article||''},SENTS=[],WORDS=[],focusI=0;
 const bodyEl=$('#article-body'),scrollEl=$('#reader-scroll');
 function render(t){
- SENTS=[];WORDS=[];TTS.units=null;
+ SENTS=[];WORDS=[];TTS.units=null;focusI=0;
  const ps=splitParagraphs(t);
- if(!ps.length){bodyEl.innerHTML='<div class="empty">还没有文章<br>先到「粘贴」页添加英文内容<br><button class="btn primary" data-goto="paste">去粘贴</button></div>';$('#dock').classList.add('off');return}
+ if(!ps.length){bodyEl.innerHTML='<div class="empty">还没有文章<br>先到「上传」页添加英文内容<br><button class="btn primary" data-goto="paste">去粘贴</button></div>';$('#dock').classList.add('off');return}
  const frag=document.createDocumentFragment();
+ /* 一个原文段落 = 一个 <p>，句子在段内以行内 span 连续排布（两端对齐才不会每句都留空尾） */
  ps.forEach((p,pi)=>{
-  sentences(p).forEach(s=>{
-   const pe=document.createElement('p');pe.className='para';
+  const pe=document.createElement('p');pe.className='para';
+  sentences(p).forEach((s,k)=>{
+   if(k)pe.appendChild(document.createTextNode(' '));
    const se=document.createElement('span');se.className='sent';se.dataset.i=SENTS.length;se.innerHTML=wrapHtml(s);
-   SENTS.push({el:se,text:s,paragraph:pi,paragraphText:p});pe.appendChild(se);frag.appendChild(pe);
+   SENTS.push({el:se,text:s,paragraph:pi,paragraphText:p});pe.appendChild(se);
   });
+  if(pe.childNodes.length)frag.appendChild(pe);
  });
  bodyEl.innerHTML='';bodyEl.appendChild(frag);
  WORDS=Array.from(bodyEl.querySelectorAll('.w'));WORDS.forEach((e,i)=>{e.dataset.k=i});
  $('#dock').classList.remove('off');
 }
-function progressFor(id){const v=S.positions&&S.positions[id];if(typeof v==='number'&&Number.isFinite(v))return Math.max(0,Math.min(1,v));if(v&&typeof v.ratio==='number'&&Number.isFinite(v.ratio))return Math.max(0,Math.min(1,v.ratio));return id===S.posId?Math.max(0,Math.min(1,Number(S.pos)||0)):0;}
+function progressFor(id){const v=S.positions&&S.positions[id];if(v===undefined){const f=S.favorites.find(x=>x.id===id);if(f&&Number.isFinite(f.progress))return Math.max(0,Math.min(1,f.progress))}if(typeof v==='number'&&Number.isFinite(v))return Math.max(0,Math.min(1,v));if(v&&typeof v.ratio==='number'&&Number.isFinite(v.ratio))return Math.max(0,Math.min(1,v.ratio));return id===S.posId?Math.max(0,Math.min(1,Number(S.pos)||0)):0;}
 function updateReadProgress(value){const max=Math.max(0,scrollEl.scrollHeight-scrollEl.clientHeight),ratio=value===undefined?(max>0?scrollEl.scrollTop/max:(SENTS.length?1:0)):value,p=Math.max(0,Math.min(1,ratio));$('#read-progress-fill').style.width=(p*100)+'%';$('#read-progress-text').textContent=Math.round(p*100)+'%';}
-function persistReadingProgress(){if(!current.id)return;const max=Math.max(0,scrollEl.scrollHeight-scrollEl.clientHeight),ratio=max>0?scrollEl.scrollTop/max:(SENTS.length?1:0),spoken=TTS.on&&TTS.units&&TTS.units[TTS.i]?TTS.units[TTS.i].si:null,anchor=Number.isInteger(spoken)?spoken:focusI;S.positions[current.id]={ratio:Math.max(0,Math.min(1,ratio)),sentence:anchor,updatedAt:Date.now()};S.pos=S.positions[current.id].ratio;S.posId=current.id;const fav=S.favorites.find(x=>x.id===current.id);if(fav)fav.progress=S.pos;save();updateReadProgress(S.pos);}
-function restoreReadPosition(id,fallback){const saved=S.positions&&S.positions[id],si=saved&&Number.isInteger(saved.sentence)?saved.sentence:-1;if(si>=0&&SENTS[si]){const sc=scrollEl.getBoundingClientRect(),r=SENTS[si].el.getBoundingClientRect(),target=sc.top+Math.min(sc.height*.34,240);scrollEl.scrollTop+=r.top-target;}else scrollEl.scrollTop=Math.max(0,Math.min(1,fallback||0))*Math.max(0,scrollEl.scrollHeight-scrollEl.clientHeight);updateFocus();updateReadProgress();persistReadingProgress();}
+/* 当前视口焦点线上的句子（与专注高亮同一基准，且不依赖专注开关） */
+const FOCUS_Y=r=>r.top+Math.min(r.height*.38,250);
+function anchorIndex(){
+ if(!SENTS.length)return 0;
+ const max=Math.max(0,scrollEl.scrollHeight-scrollEl.clientHeight);
+ if(scrollEl.scrollTop<=2)return 0;
+ if(max>2&&scrollEl.scrollTop>=max-2)return SENTS.length-1;
+ const y=FOCUS_Y(scrollEl.getBoundingClientRect());
+ let lo=0,hi=SENTS.length;
+ while(lo<hi){const mid=(lo+hi)>>1;if(SENTS[mid].el.getBoundingClientRect().bottom<y)lo=mid+1;else hi=mid}
+ let best=Math.min(lo,SENTS.length-1),dist=Infinity;
+ for(let k=Math.max(0,lo-2);k<=Math.min(SENTS.length-1,lo+2);k++){const rs=SENTS[k].el.getClientRects();let d=Infinity;for(let q=0;q<rs.length;q++){const b=rs[q],dd=y<b.top?b.top-y:y>b.bottom?y-b.bottom:0;if(dd<d)d=dd}if(d<dist){dist=d;best=k}}
+ return best;
+}
+/* 阅读面板不可见时（切到其他标签 / 退到后台）布局高度为 0，绝不能写入进度，否则会被覆盖成 100% */
+function persistReadingProgress(){if(!current.id||!SENTS.length||!$('#panel-read').classList.contains('active')||!scrollEl.clientHeight)return;const max=Math.max(0,scrollEl.scrollHeight-scrollEl.clientHeight),ratio=max>0?scrollEl.scrollTop/max:(SENTS.length?1:0),spoken=TTS.on&&TTS.units&&TTS.units[TTS.i]?TTS.units[TTS.i].si:null,anchor=Number.isInteger(spoken)?spoken:anchorIndex();S.positions[current.id]={ratio:Math.max(0,Math.min(1,ratio)),sentence:anchor,updatedAt:Date.now()};S.pos=S.positions[current.id].ratio;S.posId=current.id;const fav=S.favorites.find(x=>x.id===current.id);if(fav)fav.progress=S.pos;save();updateReadProgress(S.pos);}
+function restoreReadPosition(id,fallback){const saved=S.positions&&S.positions[id],si=saved&&Number.isInteger(saved.sentence)?saved.sentence:-1;if(si>=0&&SENTS[si]){const sc=scrollEl.getBoundingClientRect(),r=SENTS[si].el.getBoundingClientRect(),target=FOCUS_Y(sc)-6;scrollEl.scrollTop+=r.top-target;}else scrollEl.scrollTop=Math.max(0,Math.min(1,fallback||0))*Math.max(0,scrollEl.scrollHeight-scrollEl.clientHeight);updateFocus();updateReadProgress();persistReadingProgress();}
 function openArticle(t){stopSpeech();closeSheet();const id=hash(t),resume=progressFor(id);current={id:id,content:t};S.article=t;S.pos=resume;S.posId=id;save();render(t);updateFavBtn();tab('read');requestAnimationFrame(()=>restoreReadPosition(id,resume));}
 
 /* ---------- 专注高亮：从首句跟随到末句 ---------- */
 let focusRaf=0,posT=0,readProgressRaf=0;
-function updateFocus(){focusRaf=0;if(!$('#panel-read').classList.contains('active'))return;const old=bodyEl.querySelector('.is-focused');if(!S.focus||TTS.on||!SENTS.length){if(old)old.classList.remove('is-focused');bodyEl.classList.remove('has-focus');return}const maxScroll=Math.max(0,scrollEl.scrollHeight-scrollEl.clientHeight);let index=0;if(scrollEl.scrollTop<=2)index=0;else if(maxScroll>2&&scrollEl.scrollTop>=maxScroll-2)index=SENTS.length-1;else{const r=scrollEl.getBoundingClientRect(),targetY=r.top+Math.min(r.height*.38,250);let lo=0,hi=SENTS.length;while(lo<hi){const mid=(lo+hi)>>1,box=SENTS[mid].el.getBoundingClientRect();if(box.bottom<targetY)lo=mid+1;else hi=mid}let dist=Infinity;for(let k=Math.max(0,lo-2);k<=Math.min(SENTS.length-1,lo+2);k++){const box=SENTS[k].el.getBoundingClientRect(),d=targetY<box.top?box.top-targetY:targetY>box.bottom?targetY-box.bottom:0;if(d<dist){dist=d;index=k}}}const best=SENTS[index]&&SENTS[index].el;if(best!==old){if(old)old.classList.remove('is-focused');if(best){best.classList.add('is-focused');focusI=index}}bodyEl.classList.toggle('has-focus',!!best);}
+function updateFocus(){focusRaf=0;if(!$('#panel-read').classList.contains('active'))return;const old=bodyEl.querySelector('.is-focused');if(!S.focus||TTS.on||!SENTS.length){if(old)old.classList.remove('is-focused');bodyEl.classList.remove('has-focus');return}const maxScroll=Math.max(0,scrollEl.scrollHeight-scrollEl.clientHeight);let index=0;if(scrollEl.scrollTop<=2)index=0;else if(maxScroll>2&&scrollEl.scrollTop>=maxScroll-2)index=SENTS.length-1;else{const r=scrollEl.getBoundingClientRect(),targetY=r.top+Math.min(r.height*.38,250);let lo=0,hi=SENTS.length;while(lo<hi){const mid=(lo+hi)>>1,box=SENTS[mid].el.getBoundingClientRect();if(box.bottom<targetY)lo=mid+1;else hi=mid}let dist=Infinity;for(let k=Math.max(0,lo-2);k<=Math.min(SENTS.length-1,lo+2);k++){/* 句子可能跨多行，用逐行矩形计算距离，避免相邻句外接框重叠导致选错 */const rs=SENTS[k].el.getClientRects();let d=Infinity;for(let q=0;q<rs.length;q++){const b=rs[q],dd=targetY<b.top?b.top-targetY:targetY>b.bottom?targetY-b.bottom:0;if(dd<d)d=dd}if(d<dist){dist=d;index=k}}}const best=SENTS[index]&&SENTS[index].el;if(best!==old){if(old)old.classList.remove('is-focused');if(best){best.classList.add('is-focused');focusI=index}}bodyEl.classList.toggle('has-focus',!!best);}
 scrollEl.addEventListener('scroll',()=>{if(!focusRaf)focusRaf=requestAnimationFrame(updateFocus);if(!readProgressRaf)readProgressRaf=requestAnimationFrame(()=>{readProgressRaf=0;updateReadProgress()});clearTimeout(posT);posT=setTimeout(persistReadingProgress,220)},{passive:true});
 scrollEl.addEventListener('scrollend',()=>{clearTimeout(posT);persistReadingProgress();updateFocus()},{passive:true});
 
@@ -584,9 +613,14 @@ async function ai(messages,opt){
   const res=await fetch(apiBase()+'/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+S.api},body:JSON.stringify(body),signal:ctl.signal});
   const raw=await res.text();let d;try{d=JSON.parse(raw)}catch(e){}
   if(!res.ok)throw Error('API '+res.status+'：'+((d&&d.error&&d.error.message)||raw.slice(0,140)));
-  const c=d&&d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.content;
-  if(typeof c!=='string'||!c.trim())throw Error('模型没有返回内容');
-  if(d.usage){S.stats.calls++;S.stats.prompt+=Number(d.usage.prompt_tokens)||0;S.stats.completion+=Number(d.usage.completion_tokens)||0;S.stats.total+=Number(d.usage.total_tokens)||0;save();renderStats()}
+  const choice=d&&d.choices&&d.choices[0],c=choice&&choice.message&&choice.message.content;
+  if(d&&d.usage){S.stats.calls++;S.stats.prompt+=Number(d.usage.prompt_tokens)||0;S.stats.completion+=Number(d.usage.completion_tokens)||0;S.stats.total+=Number(d.usage.total_tokens)||0;save();renderStats()}
+  if(typeof c!=='string'||!c.trim()){
+   /* 推理类模型会把 max_tokens 先花在"思考"上，正文为空且 finish_reason=length：自动放大额度重试一次 */
+   if(choice&&choice.finish_reason==='length'&&!opt._retried&&(opt.maxTokens||4096)<8192)
+    return ai(messages,Object.assign({},opt,{maxTokens:Math.min(8192,(opt.maxTokens||4096)*4),timeout:(opt.timeout||90000)*1.5,_retried:1}));
+   throw Error('模型没有返回内容'+(choice&&choice.finish_reason?'（'+choice.finish_reason+'）':'')+'。若使用推理模型（如 deepseek-reasoner），请在设置中改用 deepseek-chat');
+  }
   return c.trim();
  }catch(e){
   if(e.name==='AbortError')throw Error('请求超时');
@@ -608,7 +642,8 @@ function updateResume(){const c=$('#resume-card');c.hidden=!S.article;if(S.artic
 rawEl.value=S.input||'';
 rawEl.addEventListener('input',()=>{S.input=rawEl.value;save();updateCount()});
 $('#btn-resume').addEventListener('click',()=>{if(!current.content)return;const p=progressFor(current.id);tab('read');requestAnimationFrame(()=>restoreReadPosition(current.id,p))});
-$('#btn-read-direct').addEventListener('click',()=>{const t=rawEl.value.trim();if(!t){showStatus('请先粘贴内容','bad');return}showStatus('');openArticle(t)});
+function clearInput(){rawEl.value='';S.input='';save();updateCount()}
+$('#btn-read-direct').addEventListener('click',()=>{const t=rawEl.value.trim();if(!t){showStatus('请先粘贴内容','bad');return}showStatus('');openArticle(t);clearInput()});
 $('#btn-clear').addEventListener('click',()=>{rawEl.value='';S.input='';save();updateCount();showStatus('')});
 $('#btn-paste').addEventListener('click',async()=>{
  try{const t=await navigator.clipboard.readText();if(!t){showStatus('剪贴板为空','bad');return}rawEl.value=t.slice(0,120000);S.input=rawEl.value;save();updateCount();showStatus('已粘贴','')}
@@ -632,7 +667,7 @@ $('#btn-clean').addEventListener('click',async()=>{
     {role:'user',content:parts[i]}],{temperature:.05,maxTokens:8192})));
   }
   const out=outs.join('\n\n').trim();if(!out)throw Error('没有提取到正文');
-  S.input=t;save();showStatus('整理完成 · '+wordCount(out).toLocaleString()+' words','');openArticle(out);
+  showStatus('整理完成 · '+wordCount(out).toLocaleString()+' words','');openArticle(out);clearInput();
  }catch(e){showStatus(e.message,'bad')}finally{b.disabled=false}
 });
 updateCount();
@@ -683,8 +718,8 @@ function attachSwipe(row,item,onTap){
  item.addEventListener('pointercancel',()=>finish(true));
 }
 /* 弹层 */
-function closeModal(){$('#mask').classList.remove('open');$document.querySelectorAll('.msheet').forEach(s=>s.classList.remove('open'));$('#word-modal').classList.remove('open');wordCardToken++;const a=document.activeElement;if(a&&a.blur&&a!==document.body)a.blur()}
-function openModal(id){$('#mask').classList.add('open');$document.querySelectorAll('.msheet').forEach(s=>s.classList.toggle('open',s.id===id));$('#word-modal').classList.remove('open')}
+function closeModal(){$('#mask').classList.remove('open');document.querySelectorAll('.msheet').forEach(s=>s.classList.remove('open'));$('#word-modal').classList.remove('open');wordCardToken++;const a=document.activeElement;if(a&&a.blur&&a!==document.body)a.blur()}
+function openModal(id){$('#mask').classList.add('open');document.querySelectorAll('.msheet').forEach(s=>s.classList.toggle('open',s.id===id));$('#word-modal').classList.remove('open')}
 $('#mask').addEventListener('click',closeModal);
 /* 文章分类 */
 function openCatSheet(a){
@@ -721,7 +756,7 @@ function bulkPreview(){
  const r=bulkSplit(),s=$('#bulk-status');
  s.textContent=r.all.length?('识别到 '+r.all.length+' 个，将新增 '+r.fresh.length+' 个'+(r.all.length>r.fresh.length?'（'+(r.all.length-r.fresh.length)+' 个已存在）':'')):'';
 }
-$('#btn-bulk').addEventListener('click',async()=>{
+$('#btn-bulk').addEventListener('click',()=>{
  $('#bulk-input').value='';$('#bulk-status').textContent='';openModal('bulk-sheet');
  setTimeout(()=>$('#bulk-input').focus(),320);
 });
@@ -783,8 +818,66 @@ function renderSaved(){
 }
 let wordCardIndex=0,wordCardToken=0,wordCardGesture=null;
 function openWordCard(index){if(!S.words.length)return;wordCardIndex=Math.max(0,Math.min(S.words.length-1,index));closeRow();$('#mask').classList.add('open');document.querySelectorAll('.msheet').forEach(s=>s.classList.remove('open'));$('#word-modal').classList.add('open');renderWordCard()}
-function renderWordCard(){const w=S.words[wordCardIndex];if(!w){closeModal();return}$('#word-card-count').textContent=(wordCardIndex+1)+' / '+S.words.length;$('#word-card-word').textContent=w.w;$('#word-card-context').textContent=w.c?'原文语境：'+w.c:'未保存原文语境，将按常用义解释。';const d=$('#word-card-detail');if(w.detail){d.className='word-modal-detail';d.textContent=w.detail}else{d.className='word-modal-detail load';d.textContent='正在获取完整双语释义…'}loadWordCardDetail(w)}
-async function loadWordCardDetail(w){if(w.detail)return;const token=++wordCardToken,d=$('#word-card-detail');try{let out;if(S.api){out=await ai([{role:'system',content:'你是专业英汉学习词典。先解释词语在所给原文语境中的准确含义，再给出柯林斯学习词典风格的简洁英文定义（自行概括，不复制词典原文）和对应中文释义。标注词性，最多列两个常见义项。不要例句或寒暄。输出：【文中含义】、【English definition】、【中文释义】。没有语境时按常用义解释。'},{role:'user',content:'词语：'+w.w+'\\n原文语境：'+(w.c||'未提供')}],{temperature:.05,maxTokens:520,timeout:35000})}else{if(/\\s/.test(w.w)||/[\\u3400-\\u9fff]/.test(w.w))throw Error('请先在「设置」中填写 API Key，以获取双语语境释义');out='【基础英文释义】\\n'+await freeDict(w.w)+'\\n\\n请在设置中填写 API Key，以获取双语详细释义。'}if(token!==wordCardToken||S.words[wordCardIndex]!==w)return;w.detail=out;d.className='word-modal-detail';d.textContent=out;save()}catch(e){if(token!==wordCardToken||S.words[wordCardIndex]!==w)return;d.className='word-modal-detail';d.textContent=e.message||'获取释义失败'}}
+function renderWordCard(){
+ const w=S.words[wordCardIndex];if(!w){closeModal();return}
+ $('#word-card-count').textContent=(wordCardIndex+1)+' / '+S.words.length;
+ $('#word-card-word').textContent=w.w;
+ const cx=$('#word-card-context');cx.textContent=w.c?'原文语境：'+w.c:'';cx.hidden=!w.c;
+ fillWordInfo(w);loadWordInfo(w);
+}
+/* 版式：红色单词 → 音节拆分 + 音标 → 柯林斯英文释义 → 中文释义 → 2 条例句 */
+function fillWordInfo(w,override){
+ const sub=$('#word-card-sub'),d=$('#word-card-detail'),i=override||w.info;
+ if(!i){sub.innerHTML='';d.className='word-modal-detail load';d.textContent='正在获取释义…';return}
+ sub.innerHTML=(i.syllables?'<span class="wi-syl">'+esc(i.syllables)+'</span>':'')+(i.phonetic?'<span class="wi-ipa">'+esc(i.phonetic)+'</span>':'');
+ let h='';
+ if(i.en)h+='<section class="wi-sec"><h4>柯林斯英文释义</h4><p>'+(i.pos?'<em class="wi-pos">'+esc(i.pos)+'</em>':'')+esc(i.en)+'</p></section>';
+ if(i.zh)h+='<section class="wi-sec"><h4>中文释义</h4><p>'+esc(i.zh)+'</p></section>';
+ if(i.examples&&i.examples.length)h+='<section class="wi-sec"><h4>例句</h4><ol class="wi-ex">'+i.examples.map(x=>'<li><div class="wi-en">'+esc(x.en)+'</div>'+(x.zh?'<div class="wi-zh">'+esc(x.zh)+'</div>':'')+'</li>').join('')+'</ol></section>';
+ if(i.note)h+='<p class="wi-note">'+esc(i.note)+'</p>';
+ d.className='word-modal-detail';
+ if(h)d.innerHTML=h;else d.textContent='没有可显示的释义';
+}
+function parseWordInfo(t){
+ const s=String(t||'').trim(),a=s.indexOf('{'),b=s.lastIndexOf('}');
+ if(a<0||b<=a)throw Error('释义格式无法解析，请重试');
+ let o;try{o=JSON.parse(s.slice(a,b+1))}catch(e){throw Error('释义格式无法解析，请重试')}
+ const str=v=>typeof v==='string'?v.trim():'';
+ return {syllables:str(o.syllables),phonetic:str(o.phonetic),pos:str(o.pos),en:str(o.en),zh:str(o.zh),
+  examples:(Array.isArray(o.examples)?o.examples:[]).slice(0,2).map(x=>({en:str(x&&x.en),zh:str(x&&x.zh)})).filter(x=>x.en)};
+}
+async function freeDictInfo(word){
+ const r=await fetch('https://api.dictionaryapi.dev/v2/entries/en/'+encodeURIComponent(word.toLowerCase()));
+ if(!r.ok)throw Error('免费词典里没有这个词');
+ const d=await r.json(),e=d&&d[0];if(!e)throw Error('没有查到释义');
+ const ph=e.phonetic||((e.phonetics||[]).find(p=>p.text)||{}).text||'';
+ const m=(e.meanings||[])[0],df=m&&m.definitions&&m.definitions[0],ex=[];
+ (e.meanings||[]).forEach(mm=>(mm.definitions||[]).forEach(dd=>{if(dd.example&&ex.length<2)ex.push({en:dd.example,zh:''})}));
+ return {syllables:'',phonetic:ph,pos:m?m.partOfSpeech:'',en:df?df.definition:'',zh:'',examples:ex,note:'填写 API Key 后可获得音节拆分、中文释义与带翻译的例句。'};
+}
+async function loadWordInfo(w){
+ if(w.info)return;
+ const token=++wordCardToken,d=$('#word-card-detail');
+ try{
+  if(S.api){
+   const raw=await ai([
+    {role:'system',content:'你是专业英汉学习词典编辑。只输出一个 JSON 对象，不要代码块，不要任何多余文字。字段：{"syllables":"音节拆分，用·连接，如 beau·ti·ful；若是词组则逐词拆分，词与词之间用空格","phonetic":"国际音标，含斜杠，如 /ˈbjuːtɪfl/","pos":"词性缩写，如 n. / v. / adj.","en":"柯林斯学习词典风格的一句英文释义，用自己的话概括，不复制词典原文，优先贴合所给语境中的含义","zh":"准确简洁的简体中文释义，优先语境义","examples":[{"en":"原创英文例句","zh":"例句的中文翻译"},{"en":"原创英文例句","zh":"例句的中文翻译"}]}。examples 必须恰好 2 条，句子自然常用，体现该词的语境义。'},
+    {role:'user',content:'词语：'+w.w+'\n原文语境：'+(w.c||'未提供')}
+   ],{temperature:.2,maxTokens:900,timeout:40000});
+   const info=parseWordInfo(raw);
+   if(token!==wordCardToken||S.words[wordCardIndex]!==w)return;
+   w.info=info;save();fillWordInfo(w);
+  }else{
+   if(/\s/.test(w.w)||/[㐀-鿿]/.test(w.w))throw Error('词组/中文需要先在「设置」中填写 API Key');
+   const info=await freeDictInfo(w.w);
+   if(token!==wordCardToken||S.words[wordCardIndex]!==w)return;
+   fillWordInfo(w,info);
+  }
+ }catch(e){
+  if(token!==wordCardToken||S.words[wordCardIndex]!==w)return;
+  d.className='word-modal-detail load';d.textContent=e.message||'获取释义失败';
+ }
+}
 function moveWordCard(delta){if(!S.words.length)return;wordCardIndex=(wordCardIndex+delta+S.words.length)%S.words.length;renderWordCard()}
 $('#word-card-close').addEventListener('click',closeModal);$('#word-card-prev').addEventListener('click',()=>moveWordCard(-1));$('#word-card-next').addEventListener('click',()=>moveWordCard(1));
 $('#word-modal').addEventListener('pointerdown',e=>{wordCardGesture={x:e.clientX,y:e.clientY}});$('#word-modal').addEventListener('pointerup',e=>{if(!wordCardGesture)return;const dx=e.clientX-wordCardGesture.x,dy=e.clientY-wordCardGesture.y;wordCardGesture=null;if(Math.abs(dx)>48&&Math.abs(dx)>Math.abs(dy)*1.25)moveWordCard(dx<0?1:-1)});
@@ -924,7 +1017,8 @@ $('#rate-range').addEventListener('input',e=>{$('#rate-val').textContent=(+e.tar
 $('#voice-sel').addEventListener('change',e=>{S.voice=e.target.value;save()});
 $('#btn-voice-test').addEventListener('click',()=>speakOnce('Hello! This is how your reading voice sounds.','en-US'));
 document.addEventListener('visibilitychange',()=>{
- if(!hasTTS||document.hidden)return;
+ if(document.hidden){try{persistReadingProgress()}catch(e){}return}
+ if(!hasTTS)return;
  if(TTS.on&&!speechSynthesis.speaking&&!speechSynthesis.pending){try{speechSynthesis.resume()}catch(e){}}
 });
 window.addEventListener('pagehide',()=>{try{persistReadingProgress()}catch(e){}if(hasTTS)try{speechSynthesis.cancel()}catch(e){}});
@@ -965,6 +1059,13 @@ function closeSheet(){
  scrollEl.style.paddingBottom='';
 }
 $('#sh-close').addEventListener('click',closeSheet);
+/* 分析 / 翻译结果出现在面板下方，需滚到可见处，否则看起来像"没有结果" */
+function revealTrans(){requestAnimationFrame(()=>{adjustForSheet();const box=$('.sheet-scroll'),el=$('#sheet-trans');if(!box||el.hidden)return;const a=box.getBoundingClientRect(),b=el.getBoundingClientRect();box.scrollTo({top:box.scrollTop+b.top-a.top-4,behavior:'smooth'})})}
+/* 快捷收起：点横条 / 点单词标题 / 在横条或标题栏下滑 / 点正文空白处 */
+$('#sheet .grab').addEventListener('click',closeSheet);
+$('#sheet-word').addEventListener('click',closeSheet);
+[$('#sheet .grab'),$('#sheet .sheet-head')].forEach(h=>{let y0=null;h.addEventListener('pointerdown',e=>{y0=e.clientY});h.addEventListener('pointerup',e=>{if(y0!==null&&e.clientY-y0>36)closeSheet();y0=null});h.addEventListener('pointercancel',()=>{y0=null})});
+scrollEl.addEventListener('click',e=>{if(!sheet.classList.contains('open'))return;if(e.target.closest&&e.target.closest('.w'))return;closeSheet()});
 bodyEl.addEventListener('click',e=>{
  const w=e.target.closest&&e.target.closest('.w');
  if(!w){if(sheet.classList.contains('open'))closeSheet();return}
@@ -1034,7 +1135,7 @@ $('#sh-add').addEventListener('click',()=>{
  }
  save();updateAddBtn();
 });
-async function explainSelection(level){const item=SENTS[sel.si];if(!item)return;const target=level==='paragraph'?(item.paragraphText||item.text):item.text,el=$('#sheet-trans'),my=++transTok;el.hidden=false;el.className='sheet-trans load';el.textContent='AI 正在分析'+(level==='paragraph'?'本段':'本句')+'…';requestAnimationFrame(adjustForSheet);try{const out=await ai([{role:'system',content:'你是一位严谨的英文语法教师。先给出准确自然的简体中文句意，再解释关键语法、时态、从句关系、修饰成分与重要搭配。整段按句子顺序说明句意与上下文逻辑。不要改写原文、编造背景或提供例句。使用清晰小标题。'},{role:'user',content:(level==='paragraph'?'请解析以下整段：\n':'请解析以下整句：\n')+target}],{temperature:.1,maxTokens:level==='paragraph'?1100:700,timeout:45000});if(my!==transTok)return;el.className='sheet-trans';el.textContent=out}catch(e){if(my!==transTok)return;el.className='sheet-trans';el.textContent=e.message||'AI 分析失败'}requestAnimationFrame(adjustForSheet)}
+async function explainSelection(level){const item=SENTS[sel.si];if(!item)return;const target=level==='paragraph'?(item.paragraphText||item.text):item.text,el=$('#sheet-trans'),my=++transTok;el.hidden=false;el.className='sheet-trans load';el.textContent='AI 正在分析'+(level==='paragraph'?'本段':'本句')+'…';revealTrans();try{const out=await ai([{role:'system',content:'你是一位严谨的英文语法教师。先给出准确自然的简体中文句意，再解释关键语法、时态、从句关系、修饰成分与重要搭配。整段按句子顺序说明句意与上下文逻辑。不要改写原文、编造背景或提供例句。使用清晰小标题。'},{role:'user',content:(level==='paragraph'?'请解析以下整段：\n':'请解析以下整句：\n')+target}],{temperature:.1,maxTokens:level==='paragraph'?3000:1600,timeout:120000});if(my!==transTok)return;el.className='sheet-trans';el.textContent=out}catch(e){if(my!==transTok)return;el.className='sheet-trans';el.textContent=e.message||'AI 分析失败'}revealTrans()}
 $('#sh-sentence-ai').addEventListener('click',()=>explainSelection('sentence'));$('#sh-paragraph-ai').addEventListener('click',()=>explainSelection('paragraph'));
 $('#sh-speak').addEventListener('click',()=>{const q=phrase();if(q)speakOnce(q)});
 $('#sh-from').addEventListener('click',()=>{const si=sel.si;closeSheet();if(si>=0)speakFrom(unitOfSentence(si))});
