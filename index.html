@@ -347,7 +347,7 @@ function applyTypography(){const root=document.documentElement;root.style.setPro
 /* ---------- 标签页 ---------- */
 function tab(n){
  if(n!=='read'&&$('#panel-read').classList.contains('active'))persistReadingProgress();
- $('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===n));
+ document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===n));
  $$('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+n));
  if(n!=='read')closeSheet();
  closeModal();
