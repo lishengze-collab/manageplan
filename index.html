@@ -539,6 +539,7 @@ function sentences(p){
   if(/(?:^|\s)[ei]\.$/i.test(before)&&/^[gG]\./.test(after))return true;
   if(titles.test(before)&&after.trim())return true;
   if(/(?:^|\s)[A-Z]\.$/.test(before)&&/^\s*[A-Z]/.test(after))return true;
+  if(/(?:^|\s)(?:[A-Z]\.)+[A-Z]\.$/.test(before)&&/^[A-Z]\./.test(after))return true;
   if(/(?:^|\s)(?:no|fig)\.$/i.test(before)&&/^\s*\d/.test(after))return true;
   if(abbreviations.test(before)&&/^\s*[a-z]/.test(after))return true;
   return false;
