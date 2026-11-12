@@ -530,7 +530,7 @@ function sentences(p){
  const out=[];let start=0;
  const terminal=/[.!?。！？…؟۔｡።]/;
  const closing=/["'’”»）)\]}】』」〕〉》]/;
- const titles=/(?:^|\s)(?:Mr|Mrs|Ms|Mx|Dr|Prof|Professor|Rev|Fr|Sr|Jr|Capt|Col|Gen|Lt|Maj|Gov|Sen|Rep|Amb|Sgt|Adm|Cmdr)\.$/i;
+ const titles=/(?:^|\s)(?:Mr|Mrs|Ms|Mx|Dr|Prof|Professor|Rev|Fr|Sr|Jr|St|Mt|Ft|Capt|Col|Gen|Lt|Maj|Gov|Sen|Rep|Amb|Sgt|Adm|Cmdr)\.$/i;
  const abbreviations=/(?:^|\s)(?:e\.g|i\.e|u\.s|u\.k|a\.m|p\.m|vs|etc|no|fig|inc|ltd|co|corp|dept|univ|mt|ft|ave|blvd|rd|st|jr|sr)\.$/i;
  function ignorePeriod(i){
   const before=src.slice(start,i+1),after=src.slice(i+1);
@@ -538,6 +538,7 @@ function sentences(p){
   if(/(?:^|\s)[ei]\.$/i.test(before)&&/^[gG]\./.test(after))return true;
   if(titles.test(before)&&after.trim())return true;
   if(/(?:^|\s)[A-Z]\.$/.test(before)&&/^\s*[A-Z]/.test(after))return true;
+  if(/(?:^|\s)(?:no|fig)\.$/i.test(before)&&/^\s*\d/.test(after))return true;
   if(abbreviations.test(before)&&/^\s*[a-z]/.test(after))return true;
   return false;
  }
