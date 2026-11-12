@@ -530,6 +530,7 @@ function sentences(p){
  const out=[];let start=0;
  const terminal=/[.!?。！？…؟۔｡።]/;
  const closing=/["'’”»）)\]}】』」〕〉》]/;
+ const attribution=/^\s+(?:(?:he|she|they|i|we|you)\b|[A-Z][A-Za-z'’-]*(?:\s+[A-Z][A-Za-z'’-]*){0,2})\s+(?:said|asked|answered|replied|whispered|shouted|murmured|added|continued|cried|exclaimed|remarked|announced|noted|wrote|called|demanded|suggested|observed)\b/i;
  const titles=/(?:^|\s)(?:Mr|Mrs|Ms|Mx|Dr|Prof|Professor|Rev|Fr|Sr|Jr|St|Mt|Ft|Capt|Col|Gen|Lt|Maj|Gov|Sen|Rep|Amb|Sgt|Adm|Cmdr)\.$/i;
  const abbreviations=/(?:^|\s)(?:e\.g|i\.e|u\.s|u\.k|a\.m|p\.m|vs|etc|no|fig|inc|ltd|co|corp|dept|univ|mt|ft|ave|blvd|rd|st|jr|sr)\.$/i;
  function ignorePeriod(i){
@@ -548,6 +549,8 @@ function sentences(p){
   let j=i+1;
   while(j<src.length&&terminal.test(src[j]))j++;
   while(j<src.length&&closing.test(src[j]))j++;
+  // 引号后的 said/asked 等转述语仍属于同一句，不把转述语拆成残句
+  if(j>i+1&&attribution.test(src.slice(j)))continue;
   const part=src.slice(start,j).trim();
   if(part)out.push(part);
   while(j<src.length&&/\s/.test(src[j]))j++;
